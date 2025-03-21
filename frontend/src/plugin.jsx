@@ -1,5 +1,7 @@
-function customCourseListPlugin(courseListData) {
+import React from 'react';
 
+const CourseList = ({courseListData}) => {
+  // Extract the "visibleList"
   const courses = courseListData.visibleList;
   // Render a list of course names
   return (
@@ -12,3 +14,5 @@ function customCourseListPlugin(courseListData) {
     </div>
   )
 }
+
+export default CourseList;
