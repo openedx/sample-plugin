@@ -24,11 +24,65 @@ the tutor-mfe plugin.
 ```
 # Example using the `learner-dashboard` MFE
 # Tell tutor to start this MFE in dev mode
+tutor mounts add ~/src/openedx/frontend-app-learner-dashboard
 tutor dev start learner-dashbard
 tutor dev launch
 
-# Go to the `profile` MFE folder locally.
-# TODO Edits needed to load our plugin locally.
+# Go to the `learner-dashboard` MFE folder locally.
+npm install /path/to/sample-plugin/frontend
+
+# Add an env.config.jsx
+# This file is not checked in and imports and injects your plugin for local
+# development.
+```
+import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
+import { CourseList } from '@feanil/sample-plugin';
+
+const config = {
+  pluginSlots: {
+    course_list_slot: {
+      // Hide the default CourseList component
+      keepDefault: false,
+      plugins: [
+        {
+          op: PLUGIN_OPERATIONS.Insert,
+          widget: {
+            id: 'custom_course_list',
+            type: DIRECT_PLUGIN,
+            priority: 60,
+            // The CourseList component recieves `courseListData` because that is what
+            // the `custom_course_list` slot provides as a plugin prop.
+            // https://github.com/openedx/frontend-app-learner-dashboard/tree/master/src/plugin-slots/CourseListSlot#plugin-props
+            RenderWidget: CourseList
+          },
+        },
+      ],
+    },
+  },
+}
+```
+export default config;
+
+# Add a module.config.js
+# This file tells webpack to use your local repo for the code of the module
+# rather than the `npm install` version of your package.
+```
+module.exports = {
+  /*
+  Modules you want to use from local source code.  Adding a module here means that when this app
+  runs its build, it'll resolve the source from peer directories of this app.
+
+  moduleName: the name you use to import code from the module.
+  dir: The relative path to the module's source code.
+  dist: The sub-directory of the source code where it puts its build artifact.  Often "dist".
+  */
+
+  localModules: [
+    { moduleName: '@feanil/sample-plugin', dir: '/path/to/sample-plugin/frontend'},
+  ],
+
+};
+```
 
 # Start up the service
 npm ci
