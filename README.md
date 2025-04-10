@@ -5,7 +5,7 @@ provide examples for the various different plugin interfaces in the Open edX
 platform.
 
 The `frontend` folder makes use of the frontend-plugin-framework and slots to
-add new components and functionality to multiple open edx frotends.
+add new components and functionality to multiple open edx frontends.
 
 The `backend` folder will contain a python django app that can that can be
 installed alongside edx-platform and makes use of the events and filters
@@ -17,7 +17,7 @@ backend and frontend plugins in a deployment of tutor.
 # Local Development for the Frontend Plugin w/Tutor
 
 When developing with tutor, it's useful to use tutor to start up the rest of
-the stack and then startup the specific MFE you want to develop on your local
+the stack and then run the specific MFE you want to develop on your local
 machine.  We just need to tell tutor to not start the specific MFE as a part of
 the tutor-mfe plugin.
 
@@ -26,14 +26,21 @@ the tutor-mfe plugin.
 # Tell tutor to start this MFE in dev mode
 tutor mounts add ~/src/openedx/frontend-app-learner-dashboard
 tutor dev start learner-dashbard
+# Update all the settings and start up everything
 tutor dev launch
+tutor dev stop
+tutor dev start lms cms mfe
+```
 
-# Go to the `learner-dashboard` MFE folder locally.
+## Go to the `learner-dashboard` MFE folder locally.
+```
 npm install /path/to/sample-plugin/frontend
+```
 
-# Add an env.config.jsx
-# This file is not checked in and imports and injects your plugin for local
-# development.
+## Add an env.config.jsx
+This file is not checked in and imports and injects your plugin for local
+development.
+
 ```
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
 import { CourseList } from '@feanil/sample-plugin';
@@ -60,12 +67,15 @@ const config = {
     },
   },
 }
-```
-export default config;
 
-# Add a module.config.js
-# This file tells webpack to use your local repo for the code of the module
-# rather than the `npm install` version of your package.
+export default config;
+```
+
+## Add a module.config.js
+
+This file tells webpack to use your local repo for the code of the module rather
+than the `npm install` version of your package.
+
 ```
 module.exports = {
   /*
