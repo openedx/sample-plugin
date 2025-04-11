@@ -41,8 +41,8 @@ jobs:
       - name: Run coverage
         if: matrix.python-version == '3.12' && matrix.toxenv == 'django42'
         uses: codecov/codecov-action@v4
-        working-directory: "./backend"
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           fail_ci_if_error: true
+          working-directory: "./backend"
