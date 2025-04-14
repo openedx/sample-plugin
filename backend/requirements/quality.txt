@@ -34,8 +34,20 @@ django==4.2.20
     # via
     #   -c https://raw.githubusercontent.com/edx/edx-lint/master/edx_lint/files/common_constraints.txt
     #   -r requirements/test.txt
+    #   django-filter
+    #   djangorestframework
+django-filter==25.1
+    # via -r requirements/test.txt
+djangorestframework==3.16.0
+    # via -r requirements/test.txt
+dnspython==2.7.0
+    # via
+    #   -r requirements/test.txt
+    #   pymongo
 edx-lint==5.6.0
     # via -r requirements/quality.in
+edx-opaque-keys==2.12.0
+    # via -r requirements/test.txt
 iniconfig==2.1.0
     # via
     #   -r requirements/test.txt
@@ -88,6 +100,10 @@ pylint-plugin-utils==0.8.2
     # via
     #   pylint-celery
     #   pylint-django
+pymongo==4.12.0
+    # via
+    #   -r requirements/test.txt
+    #   edx-opaque-keys
 pytest==8.3.5
     # via
     #   -r requirements/test.txt
@@ -117,12 +133,17 @@ stevedore==5.4.1
     # via
     #   -r requirements/test.txt
     #   code-annotations
+    #   edx-opaque-keys
 text-unidecode==1.3
     # via
     #   -r requirements/test.txt
     #   python-slugify
 tomlkit==0.13.2
     # via pylint
+typing-extensions==4.13.2
+    # via
+    #   -r requirements/test.txt
+    #   edx-opaque-keys
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
