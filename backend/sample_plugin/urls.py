@@ -1,10 +1,16 @@
 """
 URLs for sample_plugin.
 """
-from django.urls import re_path  # pylint: disable=unused-import
-from django.views.generic import TemplateView  # pylint: disable=unused-import
+from django.urls import include, path
+from rest_framework.routers import DefaultRouter
 
+from sample_plugin.views import CourseArchiveStatusViewSet
+
+# Create a router and register our viewsets with it
+router = DefaultRouter()
+router.register(r'course-archive-status', CourseArchiveStatusViewSet, basename='course-archive-status')
+
+# The API URLs are now determined automatically by the router
 urlpatterns = [
-    # TODO: Fill in URL patterns and views here.
-    # re_path(r'', TemplateView.as_view(template_name="sample_plugin/base.html")),
+    path('api/v1/', include(router.urls)),
 ]
