@@ -2,16 +2,18 @@
 Views for the sample_plugin app.
 """
 import logging
+
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
+from opaque_keys import InvalidKeyError
+from opaque_keys.edx.keys import CourseKey
 from rest_framework import filters, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 from sample_plugin.models import CourseArchiveStatus
 from sample_plugin.serializers import CourseArchiveStatusSerializer
-
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,7 @@ class CourseArchiveStatusPagination(PageNumberPagination):
     """
     Pagination class for CourseArchiveStatus.
     """
+
     page_size = 20
     page_size_query_param = 'page_size'
     max_page_size = 100
@@ -56,6 +59,7 @@ class CourseArchiveStatusThrottle(UserRateThrottle):
     """
     Throttle for the CourseArchiveStatus API.
     """
+
     rate = '60/minute'
 
 
@@ -68,6 +72,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     Filtering is available on course_id, user, and is_archived fields.
     Ordering is available on all fields.
     """
+
     serializer_class = CourseArchiveStatusSerializer
     permission_classes = [IsOwnerOrStaffSuperuser]
     pagination_class = CourseArchiveStatusPagination
@@ -120,10 +125,9 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         sophisticated validator from the edx-platform.
         """
         try:
-            from opaque_keys.edx.keys import CourseKey
             CourseKey.from_string(course_id)
             return True
-        except:
+        except InvalidKeyError:
             return False
 
     def perform_create(self, serializer):

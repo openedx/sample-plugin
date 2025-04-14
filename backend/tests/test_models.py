@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=redefined-outer-name
 """
 Tests for the `sample-plugin` models module.
 """
@@ -6,11 +7,9 @@ Tests for the `sample-plugin` models module.
 import pytest
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
-from opaque_keys.edx.django.models import CourseKeyField
 from opaque_keys.edx.keys import CourseKey
 
 from sample_plugin.models import CourseArchiveStatus
-
 
 User = get_user_model()
 

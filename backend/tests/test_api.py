@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint: disable=redefined-outer-name
 """
 Tests for the `sample-plugin` REST API.
 """
@@ -11,7 +12,6 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from sample_plugin.models import CourseArchiveStatus
-
 
 User = get_user_model()
 
@@ -98,7 +98,7 @@ def test_list_course_archive_status_authenticated(api_client, user, course_archi
 
 
 @pytest.mark.django_db
-def test_list_course_archive_status_unauthenticated(api_client, course_archive_status):
+def test_list_course_archive_status_unauthenticated(api_client):
     """
     Test that an unauthenticated user cannot list course archive statuses.
     """
