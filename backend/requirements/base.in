@@ -2,6 +2,8 @@
 -c constraints.txt
 
 Django             # Web application framework
-
+djangorestframework  # REST API framework
+django-filter      # Filtering for DRF
+edx-opaque-keys        # Open edX CourseKeyField
 
 openedx-atlas
