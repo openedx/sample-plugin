@@ -11,7 +11,7 @@ class CourseArchiveStatus(models.Model):
     Model to track the archive status of a course.
 
     Stores information about whether a course has been archived and when it was archived.
-    
+
     .. no_pii: This model does not store PII directly, only references to users via foreign keys.
     """
 
@@ -47,12 +47,14 @@ class CourseArchiveStatus(models.Model):
         """
         Return a string representation of the course archive status.
         """
+        # pylint: disable=no-member
         return f"{self.course_id} - {self.user.username} - {'Archived' if self.is_archived else 'Not Archived'}"
 
     class Meta:
         """
         Meta options for the CourseArchiveStatus model.
         """
+
         verbose_name = "Course Archive Status"
         verbose_name_plural = "Course Archive Statuses"
         ordering = ["-updated_at"]

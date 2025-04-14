@@ -10,11 +10,12 @@ class CourseArchiveStatusSerializer(serializers.ModelSerializer):
     """
     Serializer for the CourseArchiveStatus model.
     """
-    
+
     class Meta:
         """
         Meta class for CourseArchiveStatusSerializer.
         """
+
         model = CourseArchiveStatus
         fields = [
             'id',
