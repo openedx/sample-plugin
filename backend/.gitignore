@@ -66,3 +66,4 @@ requirements/private.txt
 
 # Test cruft
 default.db
+pii_report
