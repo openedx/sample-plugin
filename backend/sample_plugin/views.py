@@ -1,6 +1,7 @@
 """
 Views for the sample_plugin app.
 """
+
 import logging
 
 from django.utils import timezone
@@ -51,7 +52,7 @@ class CourseArchiveStatusPagination(PageNumberPagination):
     """
 
     page_size = 20
-    page_size_query_param = 'page_size'
+    page_size_query_param = "page_size"
     max_page_size = 100
 
 
@@ -60,7 +61,7 @@ class CourseArchiveStatusThrottle(UserRateThrottle):
     Throttle for the CourseArchiveStatus API.
     """
 
-    rate = '60/minute'
+    rate = "60/minute"
 
 
 class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
@@ -78,9 +79,16 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     pagination_class = CourseArchiveStatusPagination
     throttle_classes = [CourseArchiveStatusThrottle, AnonRateThrottle]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ['course_id', 'user', 'is_archived']
-    ordering_fields = ['course_id', 'user', 'is_archived', 'archive_date', 'created_at', 'updated_at']
-    ordering = ['-updated_at']
+    filterset_fields = ["course_id", "user", "is_archived"]
+    ordering_fields = [
+        "course_id",
+        "user",
+        "is_archived",
+        "archive_date",
+        "created_at",
+        "updated_at",
+    ]
+    ordering = ["-updated_at"]
 
     def get_queryset(self):
         """
@@ -95,7 +103,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         self._validate_query_params()
 
         # Always use select_related to avoid N+1 queries
-        base_queryset = CourseArchiveStatus.objects.select_related('user')
+        base_queryset = CourseArchiveStatus.objects.select_related("user")
 
         if user.is_staff or user.is_superuser:
             return base_queryset
@@ -108,12 +116,12 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         Validate query parameters to prevent injection.
         """
         # Example validation for course_id format
-        course_id = self.request.query_params.get('course_id')
+        course_id = self.request.query_params.get("course_id")
         if course_id and not self._is_valid_course_id(course_id):
             logger.warning(
                 "Invalid course_id in request: %s, user: %s",
                 course_id,
-                self.request.user.username
+                self.request.user.username,
             )
             raise ValidationError({"course_id": "Invalid course ID format."})
 
@@ -140,20 +148,24 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         data = serializer.validated_data.copy()
 
         # Set user to requesting user if not specified
-        if 'user' not in data:
-            data['user'] = self.request.user
+        if "user" not in data:
+            data["user"] = self.request.user
         # Only allow staff/superusers to create records for other users
-        elif data['user'] != self.request.user and not (self.request.user.is_staff or self.request.user.is_superuser):
+        elif data["user"] != self.request.user and not (
+            self.request.user.is_staff or self.request.user.is_superuser
+        ):
             logger.warning(
                 "Permission denied: User %s tried to create a record for user %s",
                 self.request.user.username,
-                data['user'].username
+                data["user"].username,
             )
-            raise PermissionDenied("You do not have permission to create records for other users.")
+            raise PermissionDenied(
+                "You do not have permission to create records for other users."
+            )
 
         # Set archive_date if is_archived is True
-        if data.get('is_archived', False):
-            data['archive_date'] = timezone.now()
+        if data.get("is_archived", False):
+            data["archive_date"] = timezone.now()
 
         # Create the record
         instance = serializer.save(**data)
@@ -163,7 +175,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
             "CourseArchiveStatus created: course_id=%s, user=%s, is_archived=%s",
             instance.course_id,
             instance.user.username,
-            instance.is_archived
+            instance.is_archived,
         )
 
         return instance
@@ -178,13 +190,13 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         data = serializer.validated_data.copy()
 
         # Handle archive_date if is_archived changes
-        if 'is_archived' in data:
+        if "is_archived" in data:
             # If changing from not archived to archived
-            if data['is_archived'] and not instance.is_archived:
-                data['archive_date'] = timezone.now()
+            if data["is_archived"] and not instance.is_archived:
+                data["archive_date"] = timezone.now()
             # If changing from archived to not archived
-            elif not data['is_archived'] and instance.is_archived:
-                data['archive_date'] = None
+            elif not data["is_archived"] and instance.is_archived:
+                data["archive_date"] = None
 
         # Update the record
         updated_instance = serializer.save(**data)
@@ -194,7 +206,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
             "CourseArchiveStatus updated: course_id=%s, user=%s, is_archived=%s",
             updated_instance.course_id,
             updated_instance.user.username,
-            updated_instance.is_archived
+            updated_instance.is_archived,
         )
 
         return updated_instance
@@ -208,7 +220,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
             "CourseArchiveStatus deleted: course_id=%s, user=%s, by=%s",
             instance.course_id,
             instance.user.username,
-            self.request.user.username
+            self.request.user.username,
         )
 
         # Delete the instance

@@ -1,6 +1,7 @@
 """
 Database models for sample_plugin.
 """
+
 from django.contrib.auth import get_user_model
 from django.db import models
 from opaque_keys.edx.django.models import CourseKeyField
@@ -16,28 +17,26 @@ class CourseArchiveStatus(models.Model):
     """
 
     course_id = CourseKeyField(
-        max_length=255,
-        db_index=True,
-        help_text="The unique identifier for the course."
+        max_length=255, db_index=True, help_text="The unique identifier for the course."
     )
 
     user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
         related_name="course_archive_statuses",
-        help_text="The user who this archive status is for."
+        help_text="The user who this archive status is for.",
     )
 
     is_archived = models.BooleanField(
         default=False,
         db_index=True,  # Add index for performance on this frequently filtered field
-        help_text="Whether the course is archived."
+        help_text="Whether the course is archived.",
     )
 
     archive_date = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="The date and time when the course was archived."
+        help_text="The date and time when the course was archived.",
     )
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -61,7 +60,6 @@ class CourseArchiveStatus(models.Model):
         # Ensure combination of course_id and user is unique
         constraints = [
             models.UniqueConstraint(
-                fields=['course_id', 'user'],
-                name='unique_user_course_archive_status'
+                fields=["course_id", "user"], name="unique_user_course_archive_status"
             )
         ]
