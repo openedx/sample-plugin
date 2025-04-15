@@ -16,24 +16,63 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='CourseArchiveStatus',
+            name="CourseArchiveStatus",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('course_id', opaque_keys.edx.django.models.CourseKeyField(db_index=True, help_text='The unique identifier for the course.', max_length=255)),
-                ('is_archived', models.BooleanField(db_index=True, default=False, help_text='Whether the course is archived.')),
-                ('archive_date', models.DateTimeField(blank=True, help_text='The date and time when the course was archived.', null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('user', models.ForeignKey(help_text='The user who this archive status is for.', on_delete=django.db.models.deletion.CASCADE, related_name='course_archive_statuses', to=settings.AUTH_USER_MODEL)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "course_id",
+                    opaque_keys.edx.django.models.CourseKeyField(
+                        db_index=True,
+                        help_text="The unique identifier for the course.",
+                        max_length=255,
+                    ),
+                ),
+                (
+                    "is_archived",
+                    models.BooleanField(
+                        db_index=True,
+                        default=False,
+                        help_text="Whether the course is archived.",
+                    ),
+                ),
+                (
+                    "archive_date",
+                    models.DateTimeField(
+                        blank=True,
+                        help_text="The date and time when the course was archived.",
+                        null=True,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        help_text="The user who this archive status is for.",
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="course_archive_statuses",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Course Archive Status',
-                'verbose_name_plural': 'Course Archive Statuses',
-                'ordering': ['-updated_at'],
+                "verbose_name": "Course Archive Status",
+                "verbose_name_plural": "Course Archive Statuses",
+                "ordering": ["-updated_at"],
             },
         ),
         migrations.AddConstraint(
-            model_name='coursearchivestatus',
-            constraint=models.UniqueConstraint(fields=('course_id', 'user'), name='unique_user_course_archive_status'),
+            model_name="coursearchivestatus",
+            constraint=models.UniqueConstraint(
+                fields=("course_id", "user"), name="unique_user_course_archive_status"
+            ),
         ),
     ]
