@@ -157,4 +157,12 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.12',
     ],
+    entry_points={
+        'lms.djangoapp': [
+            'sample_plugin = sample_plugin.apps:SamplePluginConfig',
+        ],
+        'cms.djangoapp': [
+            'sample_plugin = sample_plugin.apps:SamplePluginConfig',
+        ],
+    },
 )
