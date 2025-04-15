@@ -30,7 +30,9 @@ def user():
     Create and return a test user.
     """
     return User.objects.create_user(
-        username="testuser", email="testuser@example.com", password="password123"
+        username="testuser",
+        email="testuser@example.com",
+        password="password123",
     )
 
 
@@ -40,7 +42,9 @@ def another_user():
     Create and return another test user.
     """
     return User.objects.create_user(
-        username="anotheruser", email="anotheruser@example.com", password="password123"
+        username="anotheruser",
+        email="anotheruser@example.com",
+        password="password123",
     )
 
 
@@ -140,7 +144,11 @@ def test_create_course_archive_status(api_client, user, course_key):
     """
     api_client.force_authenticate(user=user)
     url = reverse("sample_plugin:course-archive-status-list")
-    data = {"course_id": str(course_key), "user": user.id, "is_archived": True}
+    data = {
+        "course_id": str(course_key),
+        "user": user.id,
+        "is_archived": True,
+    }
     response = api_client.post(url, data, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
@@ -166,7 +174,11 @@ def test_create_course_archive_status_for_another_user(
     """
     api_client.force_authenticate(user=user)
     url = reverse("sample_plugin:course-archive-status-list")
-    data = {"course_id": str(course_key), "user": another_user.id, "is_archived": True}
+    data = {
+        "course_id": str(course_key),
+        "user": another_user.id,
+        "is_archived": True,
+    }
     response = api_client.post(url, data, format="json")
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -181,7 +193,11 @@ def test_staff_create_course_archive_status_for_another_user(
     """
     api_client.force_authenticate(user=staff_user)
     url = reverse("sample_plugin:course-archive-status-list")
-    data = {"course_id": str(course_key), "user": user.id, "is_archived": True}
+    data = {
+        "course_id": str(course_key),
+        "user": user.id,
+        "is_archived": True,
+    }
     response = api_client.post(url, data, format="json")
 
     assert response.status_code == status.HTTP_201_CREATED
