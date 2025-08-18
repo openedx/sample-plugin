@@ -9,4 +9,4 @@ coverage:
         enabled: yes
         target: 100%
 
-comment: false
+comment: true

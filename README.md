@@ -74,7 +74,9 @@ export default config;
 ## Add a module.config.js
 
 This file tells webpack to use your local repo for the code of the module rather
-than the `npm install` version of your package.
+than the `npm install` version of your package. It's still necessary to do the
+`npm install` in the step above as this masks that install. Without that install
+there is nothing to mask.
 
 ```
 module.exports = {
@@ -97,4 +99,21 @@ module.exports = {
 # Start up the service
 npm ci
 npm start dev
+```
+
+# Local Development for the Backend Plugin w/Tutor
+
+```
+# The first time, after that you don't need to do this
+tutor mounts add lms:/home/feanil/src/hacking/sample-plugin/backend:/openedx/sample-plugin-backend
+tutor dev launch
+
+# Every time
+tutor dev start
+tutor dev exec lms bash
+# inside the lms bash shell
+pip install -e ../sample-plugin-backend
+python manage.py lms migrate
+# exit the lms bash shell
+tutor dev restart lms
 ```

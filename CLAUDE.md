@@ -18,4 +18,4 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use pytest for testing, with descriptive test function names
 - Frontend uses React and follows standard JSX conventions
 
-Always run `make quality` before creating a PR to ensure consistent code style.
+Always run `make quality` and fix issues before creating a PR to ensure consistent code style.
