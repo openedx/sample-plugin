@@ -117,3 +117,19 @@ python manage.py lms migrate
 # exit the lms bash shell
 tutor dev restart lms
 ```
+
+# Local Development for the Backend Plugin without Tutor
+
+```
+# In edx-platform
+pip install -e /path/to/sample-plugin/backend
+# start up lms/cms
+# https://github.com/openedx/edx-platform/blob/master/README.rst?plain=1#L171-L183
+
+# Enabled Learner Dashboard MFE( Called learner_home in edx-platform)
+1. Go to http://localhost:18000/admin/waffle/flag/
+2. Click `Add Flag`
+3. Set `Name` to `learner_home_mfe.enabled`
+4. Set `Everyone` to `Yes`
+5. Click `Save`
+```

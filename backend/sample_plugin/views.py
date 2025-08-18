@@ -11,7 +11,7 @@ from opaque_keys.edx.keys import CourseKey
 from rest_framework import filters, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from rest_framework.throttling import UserRateThrottle
 
 from sample_plugin.models import CourseArchiveStatus
 from sample_plugin.serializers import CourseArchiveStatusSerializer
@@ -77,7 +77,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     serializer_class = CourseArchiveStatusSerializer
     permission_classes = [IsOwnerOrStaffSuperuser]
     pagination_class = CourseArchiveStatusPagination
-    throttle_classes = [CourseArchiveStatusThrottle, AnonRateThrottle]
+    throttle_classes = [CourseArchiveStatusThrottle, ]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["course_id", "user", "is_archived"]
     ordering_fields = [
