@@ -4,6 +4,7 @@
   "main": "src/index.jsx",
   "peerDependencies": {
     "@edx/frontend-platform": "*",
+    "@openedx/paragon": "*",
     "react": "*"
   }
 }

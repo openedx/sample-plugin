@@ -1,9 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { getConfig } from "@edx/frontend-platform";
 import { getAuthenticatedHttpClient } from "@edx/frontend-platform/auth";
+import { Card, Container, Row, Col, Badge, Collapsible } from "@openedx/paragon";
 
 const CourseList = ({ courseListData }) => {
   const [archivedCourses, setArchivedCourses] = useState(new Set());
+
+  // Safety check for courseListData
+  if (!courseListData || !courseListData.visibleList) {
+    console.log("DEBUG: courseListData not available yet");
+    return <div>Loading courses...</div>;
+  }
 
   // Extract the "visibleList"
   const courses = courseListData.visibleList;
@@ -82,29 +89,50 @@ const CourseList = ({ courseListData }) => {
   console.log("DEBUG: Active courses count:", activeCourses.length);
   console.log("DEBUG: Archived courses count:", archivedCoursesList.length);
 
-  const renderCourse = (courseData) => (
-    <div key={courseData.cardId}>
-      <h2>
-        {courseData.course.courseName}
-        <img
+  const renderCourse = (courseData, isArchived = false) => (
+    <Col key={courseData.cardId} xs={12} sm={6} md={4} lg={3} className="mb-4">
+      <Card>
+        <Card.ImageCap
           src={getConfig().LMS_BASE_URL + courseData.course.bannerImgSrc}
           alt={courseData.course.courseName}
-        ></img>
-      </h2>
-    </div>
+        />
+        <Card.Header
+          title={courseData.course.courseName}
+          subtitle={courseData.course.courseNumber}
+          actions={isArchived && <Badge variant="secondary">Archived</Badge>}
+        />
+        <Card.Section>
+          {courseData.course.shortDescription && (
+            <p className="text-muted small">
+              {courseData.course.shortDescription}
+            </p>
+          )}
+        </Card.Section>
+      </Card>
+    </Col>
   );
 
   return (
-    <div>
-      {activeCourses.map(renderCourse)}
+    <Container fluid>
+      <Row>
+        {activeCourses.map((courseData) => renderCourse(courseData, false))}
+      </Row>
 
       {archivedCoursesList.length > 0 && (
-        <div>
-          <h2>Archived Courses</h2>
-          {archivedCoursesList.map(renderCourse)}
+        <div className="mt-5">
+          <Collapsible
+            title={`Archived Courses (${archivedCoursesList.length})`}
+            defaultOpen={false}
+          >
+            <Row>
+              {archivedCoursesList.map((courseData) =>
+                renderCourse(courseData, true),
+              )}
+            </Row>
+          </Collapsible>
         </div>
       )}
-    </div>
+    </Container>
   );
 };
 
