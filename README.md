@@ -48,7 +48,7 @@ import { CourseList } from '@feanil/sample-plugin';
 const config = {
   pluginSlots: {
     course_list_slot: {
-      // Hide the default CourseList component
+      // Hide/Show the default CourseList component
       keepDefault: false,
       plugins: [
         {
