@@ -77,7 +77,9 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     serializer_class = CourseArchiveStatusSerializer
     permission_classes = [IsOwnerOrStaffSuperuser]
     pagination_class = CourseArchiveStatusPagination
-    throttle_classes = [CourseArchiveStatusThrottle, ]
+    throttle_classes = [
+        CourseArchiveStatusThrottle,
+    ]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ["course_id", "user", "is_archived"]
     ordering_fields = [
@@ -142,29 +144,26 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         """
         Perform creation of a new CourseArchiveStatus.
 
-        Sets the user to the requesting user if not specified.
-        Sets archive_date and archived_by if is_archived is True.
+        Validates permission for user override and sets archive_date if needed.
         """
-        data = serializer.validated_data.copy()
-
-        # Set user to requesting user if not specified
-        if "user" not in data:
-            data["user"] = self.request.user
-        # Only allow staff/superusers to create records for other users
-        elif data["user"] != self.request.user and not (
-            self.request.user.is_staff or self.request.user.is_superuser
-        ):
-            logger.warning(
-                "Permission denied: User %s tried to create a record for user %s",
-                self.request.user.username,
-                data["user"].username,
-            )
-            raise PermissionDenied(
-                "You do not have permission to create records for other users."
-            )
+        # Check if user was explicitly provided and differs from current user
+        if "user" in self.request.data:
+            requested_user_id = self.request.data["user"]
+            if requested_user_id != self.request.user.id and not (
+                self.request.user.is_staff or self.request.user.is_superuser
+            ):
+                logger.warning(
+                    "Permission denied: User %s tried to create a record for user %s",
+                    self.request.user.username,
+                    requested_user_id,
+                )
+                raise PermissionDenied(
+                    "You do not have permission to create records for other users."
+                )
 
         # Set archive_date if is_archived is True
-        if data.get("is_archived", False):
+        data = {}
+        if serializer.validated_data.get("is_archived", False):
             data["archive_date"] = timezone.now()
 
         # Create the record
@@ -184,18 +183,33 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         """
         Perform update of an existing CourseArchiveStatus.
 
-        Updates archive_date and archived_by if is_archived changes.
+        Validates permission for user override and updates archive_date if needed.
         """
         instance = serializer.instance
-        data = serializer.validated_data.copy()
+
+        # Check if user was explicitly provided and differs from current user
+        if "user" in self.request.data:
+            requested_user_id = self.request.data["user"]
+            if requested_user_id != self.request.user.id and not (
+                self.request.user.is_staff or self.request.user.is_superuser
+            ):
+                logger.warning(
+                    "Permission denied: User %s tried to update a record for user %s",
+                    self.request.user.username,
+                    requested_user_id,
+                )
+                raise PermissionDenied(
+                    "You do not have permission to update records for other users."
+                )
 
         # Handle archive_date if is_archived changes
-        if "is_archived" in data:
+        data = {}
+        if "is_archived" in serializer.validated_data:
             # If changing from not archived to archived
-            if data["is_archived"] and not instance.is_archived:
+            if serializer.validated_data["is_archived"] and not instance.is_archived:
                 data["archive_date"] = timezone.now()
             # If changing from archived to not archived
-            elif not data["is_archived"] and instance.is_archived:
+            elif not serializer.validated_data["is_archived"] and instance.is_archived:
                 data["archive_date"] = None
 
         # Update the record

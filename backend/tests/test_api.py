@@ -277,3 +277,170 @@ def test_staff_can_update_other_user_course_archive_status(
 
     assert response.status_code == status.HTTP_200_OK
     assert response.data["is_archived"] is True
+
+
+# New tests for optional user field behavior
+@pytest.mark.django_db
+def test_create_course_archive_status_without_user_field(api_client, user, course_key):
+    """
+    Test that a user can create a course archive status without specifying user field.
+    The user field should default to the current user.
+    """
+    api_client.force_authenticate(user=user)
+    url = reverse("sample_plugin:course-archive-status-list")
+    data = {
+        "course_id": str(course_key),
+        "is_archived": True,
+    }
+    # Note: No "user" field in data
+    response = api_client.post(url, data, format="json")
+
+    if response.status_code != status.HTTP_201_CREATED:
+        print(f"Response status: {response.status_code}")
+        print(f"Response data: {response.data}")
+    
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["course_id"] == str(course_key)
+    assert response.data["user"] == user.id
+    assert response.data["is_archived"] is True
+    assert response.data["archive_date"] is not None
+
+    # Verify in database
+    course_archive_status = CourseArchiveStatus.objects.get(
+        course_id=course_key, user=user
+    )
+    assert course_archive_status.is_archived is True
+    assert course_archive_status.user == user
+
+
+@pytest.mark.django_db
+def test_update_course_archive_status_without_user_field(api_client, user, course_archive_status):
+    """
+    Test that a user can update their course archive status without specifying user field.
+    The user field should remain unchanged.
+    """
+    api_client.force_authenticate(user=user)
+    url = reverse(
+        "sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
+    )
+    data = {"is_archived": True}
+    # Note: No "user" field in data
+    response = api_client.patch(url, data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["is_archived"] is True
+    assert response.data["user"] == user.id
+    assert response.data["archive_date"] is not None
+
+    # Verify in database
+    course_archive_status.refresh_from_db()
+    assert course_archive_status.is_archived is True
+    assert course_archive_status.user == user
+
+
+@pytest.mark.django_db
+def test_staff_create_with_explicit_user_override(
+    api_client, staff_user, user, course_key
+):
+    """
+    Test that staff can explicitly set user field to override default behavior.
+    """
+    api_client.force_authenticate(user=staff_user)
+    url = reverse("sample_plugin:course-archive-status-list")
+    data = {
+        "course_id": str(course_key),
+        "user": user.id,
+        "is_archived": True,
+    }
+    response = api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["course_id"] == str(course_key)
+    assert response.data["user"] == user.id  # Should be the specified user, not staff_user
+    assert response.data["is_archived"] is True
+
+    # Verify in database
+    course_archive_status = CourseArchiveStatus.objects.get(
+        course_id=course_key, user=user
+    )
+    assert course_archive_status.user == user
+    assert course_archive_status.user != staff_user
+
+
+@pytest.mark.django_db
+def test_staff_update_with_explicit_user_override(
+    api_client, staff_user, user, another_user, course_key
+):
+    """
+    Test that staff can explicitly change user field when updating.
+    """
+    # Create initial record for user
+    initial_status = CourseArchiveStatus.objects.create(
+        course_id=course_key, user=user, is_archived=False
+    )
+    
+    api_client.force_authenticate(user=staff_user)
+    url = reverse(
+        "sample_plugin:course-archive-status-detail", args=[initial_status.id]
+    )
+    data = {
+        "user": another_user.id,
+        "is_archived": True,
+    }
+    response = api_client.patch(url, data, format="json")
+
+    assert response.status_code == status.HTTP_200_OK
+    assert response.data["user"] == another_user.id  # Should be changed to another_user
+    assert response.data["is_archived"] is True
+
+    # Verify in database
+    initial_status.refresh_from_db()
+    assert initial_status.user == another_user
+    assert initial_status.is_archived is True
+
+
+@pytest.mark.django_db
+def test_regular_user_cannot_override_user_field_create(
+    api_client, user, another_user, course_key
+):
+    """
+    Test that regular users cannot override user field to create records for other users.
+    """
+    api_client.force_authenticate(user=user)
+    url = reverse("sample_plugin:course-archive-status-list")
+    data = {
+        "course_id": str(course_key),
+        "user": another_user.id,  # Try to create for another user
+        "is_archived": True,
+    }
+    response = api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_403_FORBIDDEN
+
+
+@pytest.mark.django_db  
+def test_staff_create_without_user_field_defaults_to_current_user(
+    api_client, staff_user, course_key
+):
+    """
+    Test that even staff users get records created for themselves when no user specified.
+    """
+    api_client.force_authenticate(user=staff_user)
+    url = reverse("sample_plugin:course-archive-status-list")
+    data = {
+        "course_id": str(course_key),
+        "is_archived": True,
+    }
+    # Note: No "user" field in data
+    response = api_client.post(url, data, format="json")
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.data["course_id"] == str(course_key)
+    assert response.data["user"] == staff_user.id  # Should default to current user (staff)
+    assert response.data["is_archived"] is True
+
+    # Verify in database
+    course_archive_status = CourseArchiveStatus.objects.get(
+        course_id=course_key, user=staff_user
+    )
+    assert course_archive_status.user == staff_user
