@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { getConfig } from "@edx/frontend-platform";
 import { getAuthenticatedHttpClient } from "@edx/frontend-platform/auth";
-import { Card, Container, Row, Col, Badge, Collapsible } from "@openedx/paragon";
+import {
+  Card,
+  Container,
+  Row,
+  Col,
+  Badge,
+  Collapsible,
+  Button,
+  Spinner,
+} from "@openedx/paragon";
+import { Archive, Unarchive } from "@openedx/paragon/icons";
 
 const CourseList = ({ courseListData }) => {
   const [archivedCourses, setArchivedCourses] = useState(new Set());
+  const [loadingStates, setLoadingStates] = useState(new Map());
 
   // Safety check for courseListData
   if (!courseListData || !courseListData.visibleList) {
@@ -89,28 +100,145 @@ const CourseList = ({ courseListData }) => {
   console.log("DEBUG: Active courses count:", activeCourses.length);
   console.log("DEBUG: Archived courses count:", archivedCoursesList.length);
 
-  const renderCourse = (courseData, isArchived = false) => (
-    <Col key={courseData.cardId} xs={12} sm={6} md={4} lg={3} className="mb-4">
-      <Card>
-        <Card.ImageCap
-          src={getConfig().LMS_BASE_URL + courseData.course.bannerImgSrc}
-          alt={courseData.course.courseName}
-        />
-        <Card.Header
-          title={courseData.course.courseName}
-          subtitle={courseData.course.courseNumber}
-          actions={isArchived && <Badge variant="secondary">Archived</Badge>}
-        />
-        <Card.Section>
-          {courseData.course.shortDescription && (
-            <p className="text-muted small">
-              {courseData.course.shortDescription}
-            </p>
-          )}
-        </Card.Section>
-      </Card>
-    </Col>
-  );
+  const handleArchiveToggle = async (courseId, isCurrentlyArchived) => {
+    console.log(
+      `DEBUG: Toggling archive for course ${courseId}, currently archived: ${isCurrentlyArchived}`,
+    );
+
+    setLoadingStates((prev) => new Map(prev).set(courseId, true));
+
+    try {
+      const client = getAuthenticatedHttpClient();
+      const lmsBaseUrl = getConfig().LMS_BASE_URL;
+      const url = `${lmsBaseUrl}/sample-plugin/api/v1/course-archive-status/`;
+
+      if (isCurrentlyArchived) {
+        // Unarchive: Find existing record and update it
+        const listResponse = await client.get(url, {
+          params: { course_id: courseId },
+        });
+
+        if (listResponse.data.results.length > 0) {
+          const existingRecord = listResponse.data.results[0];
+          await client.patch(`${url}${existingRecord.id}/`, {
+            is_archived: false,
+          });
+        }
+
+        // Update local state
+        setArchivedCourses((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(courseId);
+          return newSet;
+        });
+      } else {
+        // Archive: Check if record exists first, then create or update
+        const listResponse = await client.get(url, {
+          params: { course_id: courseId },
+        });
+
+        if (listResponse.data.results.length > 0) {
+          // Update existing record
+          const existingRecord = listResponse.data.results[0];
+          await client.patch(`${url}${existingRecord.id}/`, {
+            is_archived: true,
+          });
+        } else {
+          // Create new record
+          console.log(
+            `DEBUG: Creating new archive record for course ${courseId}`,
+          );
+          const createResponse = await client.post(url, {
+            course_id: courseId,
+            is_archived: true,
+          });
+          console.log(`DEBUG: Create response:`, createResponse.data);
+        }
+
+        // Update local state
+        console.log(`DEBUG: Adding course ${courseId} to archived set`);
+        setArchivedCourses((prev) => {
+          const newSet = new Set(prev).add(courseId);
+          console.log(`DEBUG: New archived courses set:`, Array.from(newSet));
+          return newSet;
+        });
+      }
+
+      console.log(
+        `DEBUG: Successfully ${isCurrentlyArchived ? "unarchived" : "archived"} course ${courseId}`,
+      );
+    } catch (error) {
+      console.error(
+        `Failed to ${isCurrentlyArchived ? "unarchive" : "archive"} course:`,
+        error,
+      );
+      console.error("Error details:", {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+      });
+      // Could add toast notification here
+    } finally {
+      setLoadingStates((prev) => {
+        const newMap = new Map(prev);
+        newMap.delete(courseId);
+        return newMap;
+      });
+    }
+  };
+
+  const renderCourse = (courseData, isArchived = false) => {
+    const courseId = courseData.courseRun?.courseId;
+    const isLoading = loadingStates.get(courseId);
+
+    return (
+      <Col
+        key={courseData.cardId}
+        xs={12}
+        sm={6}
+        md={4}
+        lg={3}
+        className="mb-4"
+      >
+        <Card>
+          <Card.ImageCap
+            src={getConfig().LMS_BASE_URL + courseData.course.bannerImgSrc}
+            alt={courseData.course.courseName}
+          />
+          <Card.Header
+            title={courseData.course.courseName}
+            subtitle={courseData.course.courseNumber}
+            actions={isArchived && <Badge variant="secondary">Archived</Badge>}
+          />
+          <Card.Section>
+            {courseData.course.shortDescription && (
+              <p className="text-muted small">
+                {courseData.course.shortDescription}
+              </p>
+            )}
+          </Card.Section>
+          <Card.Footer>
+            <Button
+              variant={isArchived ? "outline-primary" : "outline-secondary"}
+              size="sm"
+              disabled={isLoading}
+              onClick={() => handleArchiveToggle(courseId, isArchived)}
+              iconBefore={
+                isLoading ? Spinner : isArchived ? Unarchive : Archive
+              }
+            >
+              {isLoading
+                ? "Processing..."
+                : isArchived
+                  ? "Unarchive"
+                  : "Archive"}
+            </Button>
+          </Card.Footer>
+        </Card>
+      </Col>
+    );
+  };
 
   return (
     <Container fluid>
