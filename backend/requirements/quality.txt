@@ -12,6 +12,10 @@ astroid==3.3.11
     # via
     #   pylint
     #   pylint-celery
+attrs==25.3.0
+    # via
+    #   -r requirements/test.txt
+    #   openedx-events
 cffi==1.17.1
     # via
     #   -r requirements/test.txt
@@ -45,6 +49,8 @@ django==4.2.23
     #   django-waffle
     #   djangorestframework
     #   edx-django-utils
+    #   openedx-events
+    #   openedx-filters
 django-crum==0.7.9
     # via
     #   -r requirements/test.txt
@@ -63,12 +69,26 @@ dnspython==2.7.0
     # via
     #   -r requirements/test.txt
     #   pymongo
+edx-ccx-keys==2.0.2
+    # via
+    #   -r requirements/test.txt
+    #   openedx-events
 edx-django-utils==8.0.0
-    # via -r requirements/test.txt
+    # via
+    #   -r requirements/test.txt
+    #   openedx-events
 edx-lint==5.6.0
     # via -r requirements/quality.in
-edx-opaque-keys==3.0.0
-    # via -r requirements/test.txt
+edx-opaque-keys[django]==3.0.0
+    # via
+    #   -r requirements/test.txt
+    #   edx-ccx-keys
+    #   openedx-events
+    #   openedx-filters
+fastavro==1.12.0
+    # via
+    #   -r requirements/test.txt
+    #   openedx-events
 iniconfig==2.1.0
     # via
     #   -r requirements/test.txt
@@ -88,6 +108,10 @@ markupsafe==3.0.2
 mccabe==0.7.0
     # via pylint
 openedx-atlas==0.7.0
+    # via -r requirements/test.txt
+openedx-events==10.5.0
+    # via -r requirements/test.txt
+openedx-filters==2.1.0
     # via -r requirements/test.txt
 packaging==25.0
     # via
@@ -160,7 +184,10 @@ pyyaml==6.0.2
     #   -r requirements/test.txt
     #   code-annotations
 six==1.17.0
-    # via edx-lint
+    # via
+    #   -r requirements/test.txt
+    #   edx-ccx-keys
+    #   edx-lint
 snowballstemmer==3.0.1
     # via pydocstyle
 sqlparse==0.5.3
