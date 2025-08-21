@@ -3,15 +3,15 @@ sample_plugin Django application initialization.
 """
 
 from django.apps import AppConfig
-from edx_django_utils.plugins.constants import PluginSettings, PluginSignals, PluginURLs
+from edx_django_utils.plugins.constants import PluginSettings, PluginURLs
 
 
 class SamplePluginConfig(AppConfig):
     # pylint: disable=line-too-long
     """
-    Configuration for the sample_plugin Django application.
+    Configuration for the sample_plugin Django application as an edx-platform plugin
 
-    See https://github.com/openedx/edx-django-utils/blob/master/edx_django_utils/plugins/docs/how_tos/how_to_create_a_plugin_app.rst#manual-setup
+    See https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#manual-setup
     for more details and examples.
     """  # noqa:
 
@@ -54,18 +54,21 @@ class SamplePluginConfig(AppConfig):
                 },
             },
         },
-        PluginSignals.CONFIG: {
-            "lms.djangoapp": {
-                PluginURLs.RELATIVE_PATH: "signals",
-                PluginSignals.RECEIVERS: [
-                    # Signals handlers can be registered here
-                ],
-            },
-            "cms.djangoapp": {
-                PluginURLs.RELATIVE_PATH: "signals",
-                PluginSignals.RECEIVERS: [
-                    # Signals handlers can be registered here
-                ],
-            },
-        },
+        # You could also define PluginSignals.CONFIG here as a part of this block
+        # and define all our openedx-events connections here explicitly.  However,
+        # it's much easier to just put all your signal recievers in one file and import
+        # that file below as a par of the ready() function.
+        #
+        # Docs for using PluginSignals can be found here:
+        #   https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html
     }
+
+    def ready(self):
+        """
+        Do any app specific loading that needs to happen.
+        """
+
+        # Import the handlers file so that our signal recievers
+        # get registered and can run when the relevant signals get
+        # fired.
+        from . import signals
