@@ -96,7 +96,7 @@ def _configure_openedx_filters(settings):
     filters_config = getattr(settings, 'OPEN_EDX_FILTERS_CONFIG', {})
     
     # Filter we want to register
-    filter_name = "org.openedx.learning.course.about.render.started.v1"
+    filter_name = "org.openedx.learning.course_about.page.url.requested.v1"
     our_pipeline_step = "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
     
     # Check if this filter already has configuration

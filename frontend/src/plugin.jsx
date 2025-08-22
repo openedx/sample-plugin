@@ -124,6 +124,7 @@ const CourseList = ({ courseListData }) => {
         if (listResponse.data.results.length > 0) {
           const existingRecord = listResponse.data.results[0];
           await client.patch(`${url}${existingRecord.id}/`, {
+            course_id: courseId,
             is_archived: false,
           });
         }
