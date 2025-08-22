@@ -7,12 +7,41 @@ from edx_django_utils.plugins.constants import PluginSettings, PluginURLs
 
 
 class SamplePluginConfig(AppConfig):
-    # pylint: disable=line-too-long
     """
-    Configuration for the sample_plugin Django application as an edx-platform plugin
+    Django App Plugin configuration for Open edX platform integration.
 
-    See https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#manual-setup
-    for more details and examples.
+    This class demonstrates the complete Django App Plugin pattern, which allows
+    you to add new functionality to edx-platform without modifying core code.
+
+    Key Features Demonstrated:
+    - URL configuration for both LMS and CMS
+    - Settings integration across environments (common, test, production)
+    - Signal handler registration for Open edX Events
+    - Proper plugin app structure following Open edX patterns
+
+    Official Documentation:
+    - Plugin Creation: https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html
+    - Plugin Overview: https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/readme.html
+    - Hooks Framework: https://docs.openedx.org/en/latest/developers/concepts/hooks_extension_framework.html
+
+    Real-World Usage:
+    This pattern is used when you need to:
+    - Add new models and database tables
+    - Provide new REST API endpoints
+    - Integrate with external systems via events
+    - Modify platform behavior with filters
+    - Add custom business logic
+
+    Entry Point Configuration:
+    This plugin is registered in setup.py as:
+    ```python
+    entry_points={
+        "lms.djangoapp": ["sample_plugin = sample_plugin.apps:SamplePluginConfig"],
+        "cms.djangoapp": ["sample_plugin = sample_plugin.apps:SamplePluginConfig"],
+    }
+    ```
+
+    The platform automatically discovers and loads plugins registered in these entry points.
     """  # noqa:
 
     default_auto_field = "django.db.models.BigAutoField"
@@ -54,21 +83,52 @@ class SamplePluginConfig(AppConfig):
                 },
             },
         },
-        # You could also define PluginSignals.CONFIG here as a part of this block
-        # and define all our openedx-events connections here explicitly.  However,
-        # it's much easier to just put all your signal recievers in one file and import
-        # that file below as a par of the ready() function.
+        # Alternative: PluginSignals.CONFIG
+        # You can define signal connections here instead of in ready(), but the
+        # ready() method approach is more flexible for complex signal handling.
         #
-        # Docs for using PluginSignals can be found here:
-        #   https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html
+        # Example PluginSignals configuration:
+        # PluginSignals.CONFIG: {
+        #     "lms.djangoapp": {
+        #         "relative_path": "signals",
+        #         "receivers": [{
+        #             "receiver_func_name": "log_course_info_changed",
+        #             "signal_path": "openedx_events.content_authoring.signals.COURSE_CATALOG_INFO_CHANGED",
+        #         }]
+        #     }
+        # }
+        #
+        # Documentation:
+        # - PluginSignals: https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#plugin-signals
+        # - Open edX Events: https://docs.openedx.org/projects/openedx-events/en/latest/
     }
 
     def ready(self):
         """
-        Do any app specific loading that needs to happen.
-        """
+        Initialize the plugin when Django starts.
 
-        # Import the handlers file so that our signal recievers
-        # get registered and can run when the relevant signals get
-        # fired.
-        from . import signals
+        This method is called when Django initializes this app. It's the proper
+        place to import signal handlers, register filters, and perform other
+        startup tasks.
+
+        Key Responsibilities:
+        - Import signal handlers to register Open edX Event receivers
+        - Register Open edX Filters (if not done via settings)
+        - Initialize any plugin-specific configuration
+        - Perform validation checks
+
+        Django Documentation:
+        - AppConfig.ready(): https://docs.djangoproject.com/en/stable/ref/applications/#django.apps.AppConfig.ready
+
+        Open edX Documentation:
+        - Events: https://docs.openedx.org/projects/openedx-events/en/latest/how-tos/consume-an-event.html
+        - Filters: https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html
+
+        Why Import in ready():
+        Signal handlers must be imported for the @receiver decorators to register
+        with Django's signal dispatcher. Importing in ready() ensures this happens
+        when the app initializes, not when modules are first loaded.
+        """
+        # Import signal handlers to register Open edX Event receivers
+        # This import registers all @receiver decorated functions in signals.py
+        from . import signals  # noqa: F401
