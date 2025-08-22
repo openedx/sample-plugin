@@ -10,8 +10,11 @@ import {
   Collapsible,
   Button,
   Spinner,
+  Dropdown,
+  IconButton,
+  Icon,
 } from "@openedx/paragon";
-import { Archive, Unarchive } from "@openedx/paragon/icons";
+import { Archive, Unarchive, MoreVert } from "@openedx/paragon/icons";
 
 const CourseList = ({ courseListData }) => {
   const [archivedCourses, setArchivedCourses] = useState(new Set());
@@ -202,14 +205,45 @@ const CourseList = ({ courseListData }) => {
         className="mb-4"
       >
         <Card>
-          <Card.ImageCap
-            src={getConfig().LMS_BASE_URL + courseData.course.bannerImgSrc}
-            alt={courseData.course.courseName}
-          />
+          <a href={courseData.courseRun?.homeUrl || '#'}>
+            <Card.ImageCap
+              src={getConfig().LMS_BASE_URL + courseData.course.bannerImgSrc}
+              alt={courseData.course.courseName}
+            />
+          </a>
           <Card.Header
-            title={courseData.course.courseName}
+            title={
+              <a href={courseData.courseRun?.homeUrl || '#'}>
+                {courseData.course.courseName}
+              </a>
+            }
             subtitle={courseData.course.courseNumber}
-            actions={isArchived && <Badge variant="secondary">Archived</Badge>}
+            actions={
+              <>
+                {isArchived && <Badge variant="secondary" className="me-2">Archived</Badge>}
+                <Dropdown>
+                  <Dropdown.Toggle
+                    id={`course-menu-${courseData.cardId}`}
+                    as={IconButton}
+                    src={MoreVert}
+                    iconAs={Icon}
+                    variant="primary"
+                    aria-label="More actions"
+                  />
+                  <Dropdown.Menu>
+                    {courseData.course.socialShareUrl && (
+                      <Dropdown.Item
+                        href={courseData.course.socialShareUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        View Course About Page
+                      </Dropdown.Item>
+                    )}
+                  </Dropdown.Menu>
+                </Dropdown>
+              </>
+            }
           />
           <Card.Section>
             {courseData.course.shortDescription && (
