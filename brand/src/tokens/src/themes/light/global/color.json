@@ -1,0 +1,65 @@
+{
+  "$type": "color",
+  "color": {
+    "brand": {
+      "base": {
+        "$value": "#9810fa",
+        "source": "$brand",
+        "$description": "Basic brand color."
+      },
+      "100": {
+        "$value": "#e9d4ff",
+        "source": "$brand-100",
+        "$description": "Brand color of level 100.",
+        "modify": null
+      },
+      "200": {
+        "$value": "#dab2ff",
+        "source": "$brand-200",
+        "$description": "Brand color of level 200.",
+        "modify": null
+      },
+      "300": {
+        "$value": "#c27aff",
+        "source": "$brand-300",
+        "$description": "Brand color of level 300.",
+        "modify": null
+      },
+      "400": {
+        "$value": "#ad46ff",
+        "source": "$brand-400",
+        "$description": "Brand color of level 400.",
+        "modify": null
+      },
+      "500": {
+        "$value": "{color.brand.base}",
+        "source": "$brand-500",
+        "$description": "Brand color of level 500."
+      },
+      "600": {
+        "$value": "#8200db",
+        "source": "$brand-600",
+        "$description": "Brand color of level 600.",
+        "modify": null
+      },
+      "700": {
+        "$value": "#6e11b0",
+        "source": "$brand-700",
+        "$description": "Brand color of level 700.",
+        "modify": null
+      },
+      "800": {
+        "$value": "#59168b",
+        "source": "$brand-800",
+        "$description": "Brand color of level 800.",
+        "modify": null
+      },
+      "900": {
+        "$value": "#3c0366",
+        "source": "$brand-900",
+        "$description": "Brand color of level 900.",
+        "modify": null
+      }
+    }
+  }
+}

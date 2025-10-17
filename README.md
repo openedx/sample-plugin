@@ -33,6 +33,7 @@ This sample plugin showcases the **Open edX Hooks Extension Framework**, which a
 | **Events (Signals)** | React to platform events | [Open edX Events Guide](https://docs.openedx.org/projects/openedx-events/en/latest/) | [`backend/sample_plugin/signals.py`](./backend/sample_plugin/signals.py) | Integrating with external systems, audit logging |
 | **Filters** | Modify platform behavior | [Using Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html) | [`backend/sample_plugin/pipeline.py`](./backend/sample_plugin/pipeline.py) | Customizing business logic, URL redirects |
 | **Frontend Slots** | Customize MFE interfaces | [Frontend Plugin Slots](https://docs.openedx.org/en/latest/site_ops/how-tos/use-frontend-plugin-slots.html) | [`frontend/`](./frontend/) | UI customization, adding new components |
+| **Brand Packages** | Customize theming | [Open edX Brand Package Interface](https://github.com/openedx/brand-openedx) | [`brand/`](./brand/) | UI theming |
 | **Tutor Plugin** | Deploy plugins easily | [Tutor Plugin Development](https://docs.tutor.edly.io/) | [`tutor/`](./tutor/) | Simplified deployment and configuration |
 
 ## Quick Start Guide
