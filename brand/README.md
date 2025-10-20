@@ -11,7 +11,10 @@
 ## Using this brand package
 
 > [!IMPORTANT]
-> These instructions assume you have a [tutor](https://docs.tutor.edly.io/index.html) main environment set up.
+> These instructions assume you have an environment that supports design tokens
+> * **Paragon >= 23**
+> * **Open edX "Teak" release (Tutor >= 20)**
+> * **Tutor >= 20**
 
 ### Configure `tutor` to use this theme
 
