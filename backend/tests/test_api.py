@@ -298,7 +298,7 @@ def test_create_course_archive_status_without_user_field(api_client, user, cours
     if response.status_code != status.HTTP_201_CREATED:
         print(f"Response status: {response.status_code}")
         print(f"Response data: {response.data}")
-    
+
     assert response.status_code == status.HTTP_201_CREATED
     assert response.data["course_id"] == str(course_key)
     assert response.data["user"] == user.id
@@ -378,7 +378,7 @@ def test_staff_update_with_explicit_user_override(
     initial_status = CourseArchiveStatus.objects.create(
         course_id=course_key, user=user, is_archived=False
     )
-    
+
     api_client.force_authenticate(user=staff_user)
     url = reverse(
         "sample_plugin:course-archive-status-detail", args=[initial_status.id]
@@ -418,7 +418,7 @@ def test_regular_user_cannot_override_user_field_create(
     assert response.status_code == status.HTTP_403_FORBIDDEN
 
 
-@pytest.mark.django_db  
+@pytest.mark.django_db
 def test_staff_create_without_user_field_defaults_to_current_user(
     api_client, staff_user, course_key
 ):

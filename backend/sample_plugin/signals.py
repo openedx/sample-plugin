@@ -42,15 +42,17 @@ Common Use Cases:
 - Synchronizing data with external databases
 """
 
-from openedx_events.content_authoring.signals import COURSE_CATALOG_INFO_CHANGED
-from openedx_events.content_authoring.data import CourseCatalogData
-from django.dispatch import receiver
 import logging
+
+from django.dispatch import receiver
+from openedx_events.content_authoring.data import CourseCatalogData
+from openedx_events.content_authoring.signals import COURSE_CATALOG_INFO_CHANGED
 
 logger = logging.getLogger(__name__)
 
+
 @receiver(COURSE_CATALOG_INFO_CHANGED)
-def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **kwargs):
+def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **kwargs):  # pylint: disable=unused-argument # noqa: E501
     """
     Handle course catalog information changes.
 
