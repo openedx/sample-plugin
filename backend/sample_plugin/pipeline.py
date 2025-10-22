@@ -12,7 +12,7 @@ observe), filters can change what happens next in the platform.
 
 Key Concepts:
 - Filters receive data and return modified data
-- They run at specific pipeline steps during platform operations  
+- They run at specific pipeline steps during platform operations
 - Filters can halt execution by raising exceptions
 - Multiple filters can be chained together in a pipeline
 - Filters should be lightweight and handle errors gracefully
@@ -56,18 +56,17 @@ class ChangeCourseAboutPageUrl(PipelineStep):
     This filter hooks into the course about page URL rendering process.
     Register it for the filter: org.openedx.learning.course.about.render.started.v1
 
-    Registration Example (in settings/common.py):
-    ```python
-    def plugin_settings(settings):
-        settings.OPEN_EDX_FILTERS_CONFIG = {
-            "org.openedx.learning.course.about.render.started.v1": {
-                "pipeline": [
-                    "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
-                ],
-                "fail_silently": False,
+    Registration Example (in settings/common.py)::
+
+        def plugin_settings(settings):
+            settings.OPEN_EDX_FILTERS_CONFIG = {
+                "org.openedx.learning.course.about.render.started.v1": {
+                    "pipeline": [
+                        "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
+                    ],
+                    "fail_silently": False,
+                }
             }
-        }
-    ```
 
     Filter Documentation:
     - Available Filters: https://docs.openedx.org/projects/openedx-filters/en/latest/reference/filters.html
@@ -100,7 +99,7 @@ class ChangeCourseAboutPageUrl(PipelineStep):
 
         Raises:
             FilterException: If processing should be halted
-            
+
         Filter Requirements:
         - Must return dictionary with keys matching input parameters
         - Return None to skip this filter (let other filters run)
@@ -121,14 +120,14 @@ class ChangeCourseAboutPageUrl(PipelineStep):
         match = re.search(pattern, url)
         if match:
             course_id = match.group('course_id')
-            
+
             # Example: Redirect to external marketing site
             new_url = f"https://example.com/new_about_page/{course_id}"
-            
+
             logger.debug(
                 f"Redirecting course about page for {course_id} from {url} to {new_url}"
             )
-            
+
             # Return modified data
             return {"url": new_url, "org": org}
 
@@ -137,17 +136,17 @@ class ChangeCourseAboutPageUrl(PipelineStep):
         return {"url": url, "org": org}
 
         # Alternative patterns for different business logic:
-        
+
         # Organization-based routing:
         # if org == "special_org":
         #     new_url = f"https://special-site.com/courses/{course_id}"
         #     return {"url": new_url, "org": org}
-        
+
         # Course type-based routing:
         # if "MicroMasters" in course_id:
         #     new_url = f"https://micromasters.example.com/{course_id}"
         #     return {"url": new_url, "org": org}
-        
+
         # A/B testing implementation:
         # import random
         # if random.choice([True, False]):

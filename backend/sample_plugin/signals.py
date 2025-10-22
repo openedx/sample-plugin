@@ -85,22 +85,21 @@ def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **k
     - Log changes for audit and compliance
     - Update analytics dashboards with new course information
 
-    Example Implementation:
-    ```python
-    # Send to external CRM system
-    external_api.update_course(
-        course_id=str(catalog_info.course_key),
-        name=catalog_info.name,
-        is_hidden=catalog_info.hidden
-    )
+    Example Implementation::
 
-    # Update internal tracking
-    CourseChangeLog.objects.create(
-        course_key=catalog_info.course_key,
-        change_type='catalog_updated',
-        timestamp=timezone.now()
-    )
-    ```
+        # Send to external CRM system
+        external_api.update_course(
+            course_id=str(catalog_info.course_key),
+            name=catalog_info.name,
+            is_hidden=catalog_info.hidden
+        )
+
+        # Update internal tracking
+        CourseChangeLog.objects.create(
+            course_key=catalog_info.course_key,
+            change_type='catalog_updated',
+            timestamp=timezone.now()
+        )
 
     Performance Considerations:
     - Keep processing lightweight (events should not block platform operations)
@@ -108,11 +107,11 @@ def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **k
     - Handle exceptions gracefully to prevent platform disruption
     """
     logging.info(f"Course catalog updated: {catalog_info.course_key}")
-    
+
     # Access available data from the event
     logging.debug(f"Course name: {catalog_info.name}")
     logging.debug(f"Course hidden: {catalog_info.hidden}")
-    
+
     # Example: Integrate with external systems
     # try:
     #     # Send to external system
@@ -123,7 +122,7 @@ def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **k
     #     )
     # except Exception as e:
     #     logging.error(f"Failed to notify external system: {e}")
-    
+
     # Example: Update internal tracking
     # from .models import CourseArchiveStatus
     # CourseArchiveStatus.objects.filter(
