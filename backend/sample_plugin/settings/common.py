@@ -16,7 +16,7 @@ Official Documentation:
 
 Settings Organization:
 - common.py: Settings for all environments
-- production.py: Production-specific overrides  
+- production.py: Production-specific overrides
 - test.py: Test environment optimizations
 
 Integration Points:
@@ -25,7 +25,7 @@ Integration Points:
 - Database connection settings for plugin models
 - External service integration parameters
 - Feature flags and environment-specific toggles
-"""
+"""  # noqa: E501
 
 import logging
 
@@ -48,11 +48,11 @@ def plugin_settings(settings):
     # Plugin-specific configuration
     settings.SAMPLE_PLUGIN_API_RATE_LIMIT = "60/minute"
     settings.SAMPLE_PLUGIN_ARCHIVE_RETENTION_DAYS = 365
-    
+
     # External service integration
     settings.SAMPLE_PLUGIN_EXTERNAL_API_URL = "https://api.example.com"
     settings.SAMPLE_PLUGIN_API_KEY = "your-api-key"
-    
+
     # Feature flags
     settings.SAMPLE_PLUGIN_ENABLE_ARCHIVING = True
     settings.SAMPLE_PLUGIN_ENABLE_NOTIFICATIONS = False
@@ -70,11 +70,11 @@ def plugin_settings(settings):
     """
     # Plugin is configured but no additional settings needed for this basic example
     # Uncomment and modify the examples below for your use case:
-    
+
     # Plugin-specific configuration
     # settings.SAMPLE_PLUGIN_API_RATE_LIMIT = "60/minute"
     # settings.SAMPLE_PLUGIN_ARCHIVE_RETENTION_DAYS = 365
-    
+
     # Register Open edX Filters (additive approach)
     _configure_openedx_filters(settings)
 
@@ -82,30 +82,30 @@ def plugin_settings(settings):
 def _configure_openedx_filters(settings):
     """
     Configure Open edX Filters for the sample plugin.
-    
+
     This function demonstrates the proper way to register filters by:
     1. Preserving existing filter configuration from other plugins
     2. Adding our filter configuration additively
     3. Avoiding duplicate pipeline steps
     4. Logging configuration state for debugging
-    
+
     Args:
         settings (dict): Django settings object
     """
     # Get existing filter configuration (may be from other plugins or platform)
     filters_config = getattr(settings, 'OPEN_EDX_FILTERS_CONFIG', {})
-    
+
     # Filter we want to register
     filter_name = "org.openedx.learning.course_about.page.url.requested.v1"
     our_pipeline_step = "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
-    
+
     # Check if this filter already has configuration
     if filter_name in filters_config:
         logger.debug(f"Filter {filter_name} already configured, adding our pipeline step")
-        
+
         # Get existing pipeline steps
         existing_pipeline = filters_config[filter_name].get("pipeline", [])
-        
+
         # Check if our pipeline step is already registered
         if our_pipeline_step in existing_pipeline:
             logger.info(
@@ -125,10 +125,10 @@ def _configure_openedx_filters(settings):
             "pipeline": [our_pipeline_step],
             "fail_silently": False,
         }
-    
+
     # Update the settings object
     settings.OPEN_EDX_FILTERS_CONFIG = filters_config
-    
+
     logger.debug(
         f"Final filter configuration for {filter_name}: "
         f"{filters_config.get(filter_name, {})}"

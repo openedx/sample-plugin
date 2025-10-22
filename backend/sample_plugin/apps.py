@@ -41,7 +41,7 @@ class SamplePluginConfig(AppConfig):
         }
 
     The platform automatically discovers and loads plugins registered in these entry points.
-    """  # noqa:
+    """  # pylint: disable=line-too-long # noqa: E501
 
     default_auto_field = "django.db.models.BigAutoField"
     name = "sample_plugin"
@@ -98,7 +98,7 @@ class SamplePluginConfig(AppConfig):
         # }
         #
         # Documentation:
-        # - PluginSignals: https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#plugin-signals
+        # - PluginSignals: https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#plugin-signals  # noqa: E501
         # - Open edX Events: https://docs.openedx.org/projects/openedx-events/en/latest/
     }
 
@@ -130,4 +130,4 @@ class SamplePluginConfig(AppConfig):
         """
         # Import signal handlers to register Open edX Event receivers
         # This import registers all @receiver decorated functions in signals.py
-        from . import signals  # noqa: F401
+        from . import signals  # pylint: disable=import-outside-toplevel,unused-import

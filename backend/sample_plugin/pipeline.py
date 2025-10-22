@@ -35,7 +35,7 @@ Common Use Cases:
 - Data transformation and validation
 - Integration with external systems
 - Custom business logic implementation
-"""
+"""  # pylint: disable=line-too-long
 
 import logging
 import re
@@ -78,9 +78,9 @@ class ChangeCourseAboutPageUrl(PipelineStep):
     - Add tracking parameters to URLs
     - Route different course types to different platforms
     - Implement A/B testing for course pages
-    """
+    """  # noqa: E501
 
-    def run_filter(self, url, org, **kwargs):
+    def run_filter(self, url, org, **kwargs):  # pylint: disable=arguments-differ
         """
         Modify the course about page URL.
 
@@ -112,7 +112,7 @@ class ChangeCourseAboutPageUrl(PipelineStep):
 
         Documentation:
         - run_filter method: https://docs.openedx.org/projects/openedx-filters/en/latest/reference/filters-tooling.html#openedx_filters.filters.PipelineStep.run_filter
-        """
+        """  # noqa: E501
         # Extract course ID using Open edX course key pattern
         # Course keys follow the format: course-v1:ORG+COURSE+RUN
         pattern = r'(?P<course_id>course-v1:[^/]+)'
