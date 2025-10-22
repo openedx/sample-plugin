@@ -33,13 +33,12 @@ class SamplePluginConfig(AppConfig):
     - Add custom business logic
 
     Entry Point Configuration:
-    This plugin is registered in setup.py as:
-    ```python
-    entry_points={
-        "lms.djangoapp": ["sample_plugin = sample_plugin.apps:SamplePluginConfig"],
-        "cms.djangoapp": ["sample_plugin = sample_plugin.apps:SamplePluginConfig"],
-    }
-    ```
+    This plugin is registered in setup.py as::
+
+        entry_points={
+            "lms.djangoapp": ["sample_plugin = sample_plugin.apps:SamplePluginConfig"],
+            "cms.djangoapp": ["sample_plugin = sample_plugin.apps:SamplePluginConfig"],
+        }
 
     The platform automatically discovers and loads plugins registered in these entry points.
     """  # noqa:
