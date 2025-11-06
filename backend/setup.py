@@ -129,7 +129,7 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding="u
 CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst'), encoding="utf8").read()
 
 setup(
-    name='sample_plugin',
+    name='openedx_sample_plugin',
     version=VERSION,
     description="""A sample backend plugin for the Open edX Platform""",
     long_description=README + '\n\n' + CHANGELOG,

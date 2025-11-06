@@ -1,5 +1,5 @@
 {
-  "name": "@feanil/sample-plugin",
+  "name": "@openedx/sample-plugin",
   "version": "0.0.1",
   "main": "src/index.jsx",
   "peerDependencies": {
