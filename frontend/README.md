@@ -97,12 +97,12 @@ useEffect(() => {
   const fetchArchivedCourses = async () => {
     const client = getAuthenticatedHttpClient();
     const lmsBaseUrl = getConfig().LMS_BASE_URL;
-    
+
     const response = await client.get(
       `${lmsBaseUrl}/sample-plugin/api/v1/course-archive-status/`,
       { params: { is_archived: true } }
     );
-    
+
     const archivedCourseIds = new Set(
       response.data.results.map((item) => item.course_id)
     );
@@ -153,7 +153,7 @@ const [loadingStates, setLoadingStates] = useState(new Map());
 
 const handleArchiveToggle = async (courseId, isCurrentlyArchived) => {
   setLoadingStates((prev) => new Map(prev).set(courseId, true));
-  
+
   try {
     // API calls to backend
     if (isCurrentlyArchived) {
@@ -161,7 +161,7 @@ const handleArchiveToggle = async (courseId, isCurrentlyArchived) => {
     } else {
       // Archive logic
     }
-    
+
     // Update local state
     setArchivedCourses((prev) => {
       const newSet = new Set(prev);
@@ -195,7 +195,7 @@ const handleArchiveToggle = async (courseId, isCurrentlyArchived) => {
 
 ```javascript
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
-import { CourseList } from '@feanil/sample-plugin';
+import { CourseList } from '@openedx/sample-plugin';
 
 const config = {
   pluginSlots: {
@@ -232,7 +232,7 @@ const config = {
 Each slot provides specific props. For CourseListSlot:
 
 ```jsx
-const CourseList = ({ 
+const CourseList = ({
   courseListData,  // Course data from platform
   // Other props depend on the slot
 }) => {
@@ -277,7 +277,7 @@ try {
     data: error.response?.data,
     message: error.message,
   });
-  
+
   // User feedback
   // Consider using toast notifications or error states
 }
@@ -323,7 +323,7 @@ Create `env.config.jsx` in your MFE root (not committed to repo):
 
 ```javascript
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
-import { CourseList } from '@feanil/sample-plugin';
+import { CourseList } from '@openedx/sample-plugin';
 
 const config = {
   pluginSlots: {
@@ -355,7 +355,7 @@ Create `module.config.js` for local development:
 module.exports = {
   localModules: [
     {
-      moduleName: '@feanil/sample-plugin', 
+      moduleName: '@openedx/sample-plugin',
       dir: '/path/to/sample-plugin/frontend'
     },
   ],
@@ -398,9 +398,9 @@ describe('CourseList Plugin', () => {
     const mockCourseData = {
       visibleList: [/* mock course data */]
     };
-    
+
     render(<CourseList courseListData={mockCourseData} />);
-    
+
     expect(screen.getByText('Archive')).toBeInTheDocument();
   });
 });
@@ -448,7 +448,7 @@ PLUGIN_SLOTS.add_items([
 
 **API Performance**:
 - Implement proper caching strategies
-- Use pagination for large datasets  
+- Use pagination for large datasets
 - Optimize backend API response times
 
 **User Experience**:
@@ -530,7 +530,7 @@ const CourseList = ({ courseListData }) => (
     {courses.map(course => (
       <Card key={course.id}>
         {/* Course info */}
-        <ArchiveButton 
+        <ArchiveButton
           courseId={course.id}
           isArchived={isArchived(course.id)}
           onToggle={handleArchiveToggle}
@@ -547,7 +547,7 @@ const CourseList = ({ courseListData }) => (
 
 **Plugin Not Loading**:
 - Check `env.config.jsx` slot name matches target slot
-- Verify plugin is installed (`npm list @feanil/sample-plugin`)
+- Verify plugin is installed (`npm list @openedx/sample-plugin`)
 - Ensure MFE supports the plugin framework version
 - Check browser console for JavaScript errors
 
