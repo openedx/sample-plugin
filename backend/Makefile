@@ -35,8 +35,9 @@ docs: ## generate Sphinx HTML documentation, including API docs
 # Define PIP_COMPILE_OPTS=-v to get more information during make upgrade.
 PIP_COMPILE = pip-compile $(PIP_COMPILE_OPTS)
 
+compile-requirements: export CUSTOM_COMPILE_COMMAND=make upgrade
 compile-requirements: piptools ## compile the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip-compile -v ${COMPILE_OPTS} --allow-unsafe --rebuild -o requirements/pip-tools.txt requirements/pip-tools.in
+	pip-compile -v ${PIP_COMPILE_OPTS} --allow-unsafe --rebuild -o requirements/pip-tools.txt requirements/pip-tools.in
 	pip install -qr requirements/pip-tools.txt
 	$(PIP_COMPILE) -o requirements/base.txt requirements/base.in
 	$(PIP_COMPILE) -o requirements/test.txt requirements/test.in
@@ -48,9 +49,8 @@ compile-requirements: piptools ## compile the requirements/*.txt files with the 
 	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
 	mv requirements/test.tmp requirements/test.txt
 
-upgrade: ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -qr requirements/pip-tools.txt
-	$(MAKE) compile-requirements COMPILE_OPTS="--upgrade"
+upgrade: piptools ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
+	$(MAKE) compile-requirements PIP_COMPILE_OPTS="--upgrade"
 
 quality: ## check coding style with pycodestyle and pylint
 	tox -e quality
@@ -59,7 +59,7 @@ pii_check: ## check for PII annotations on all Django models
 	tox -e pii_check
 
 piptools: ## install pinned version of pip-compile and pip-sync
-	pip install -r requirements/pip-tools.txt
+	# pip install -r requirements/pip-tools.txt
 
 requirements: clean_tox piptools ## install development environment requirements
 	pip-sync -q requirements/dev.txt requirements/private.*
