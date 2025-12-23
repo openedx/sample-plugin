@@ -35,11 +35,8 @@ docs: ## generate Sphinx HTML documentation, including API docs
 # Define PIP_COMPILE_OPTS=-v to get more information during make upgrade.
 PIP_COMPILE = pip-compile $(PIP_COMPILE_OPTS)
 
-compile-requirements: ## compile the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip install -qr requirements/pip-tools.txt
-	pip-compile -v ${COMPILE_OPTS} --allow-unsafe --rebuild -o requirements/pip.txt requirements/pip.in
-	pip-compile -v ${COMPILE_OPTS} -o requirements/pip-tools.txt requirements/pip-tools.in
-	pip install -qr requirements/pip.txt
+compile-requirements: piptools ## compile the requirements/*.txt files with the latest packages satisfying requirements/*.in
+	pip-compile -v ${COMPILE_OPTS} --allow-unsafe --rebuild -o requirements/pip-tools.txt requirements/pip-tools.in
 	pip install -qr requirements/pip-tools.txt
 	$(PIP_COMPILE) -o requirements/base.txt requirements/base.in
 	$(PIP_COMPILE) -o requirements/test.txt requirements/test.in
@@ -62,7 +59,6 @@ pii_check: ## check for PII annotations on all Django models
 	tox -e pii_check
 
 piptools: ## install pinned version of pip-compile and pip-sync
-	pip install -r requirements/pip.txt
 	pip install -r requirements/pip-tools.txt
 
 requirements: clean_tox piptools ## install development environment requirements
