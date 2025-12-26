@@ -33,7 +33,8 @@ sample_plugin = "sample_plugin.apps:SamplePluginConfig"
 sample_plugin = "sample_plugin.apps:SamplePluginConfig"
 
 [project.urls]
-source = "https://openedx.org/openedx/sample-plugin"
+Homepage = "https://openedx.org/openedx/sample-plugin"
+Repository = "https://openedx.org/openedx/sample-plugin"
 
 [tool.setuptools.dynamic]
 version = {attr = "sample_plugin.__version__"}
