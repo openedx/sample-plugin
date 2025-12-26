@@ -1,3 +1,36 @@
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+
+[project]
+name = "openedx-sample-plugin"
+description = "A sample backend plugin for the Open edX Platform"
+requires-python = ">=3.11"
+license="Apache-2.0"
+authors = [
+    {name = "Open edX Project", email = "oscm@openedx.org"},
+]
+classifiers = [
+    'Development Status :: 3 - Alpha',
+    'Framework :: Django',
+    'Framework :: Django :: 4.2',
+    'Intended Audience :: Developers',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.12',
+]
+keywords= [
+    "Python",
+    "edx",
+]
+
+dynamic = ["version", "readme", "dependencies"]
+
+[project.entry-points."lms.djangoapp"]
+sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+
+[project.entry-points."cms.djangoapp"]
+sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+
+[project.urls]
+source = "https://openedx.org/openedx/sample-plugin"
