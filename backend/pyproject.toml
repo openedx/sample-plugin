@@ -34,3 +34,12 @@ sample_plugin = "sample_plugin.apps:SamplePluginConfig"
 
 [project.urls]
 source = "https://openedx.org/openedx/sample-plugin"
+
+[tool.setuptools.dynamic]
+version = {attr = "sample_plugin.__version__"}
+readme = {file = ["README.rst", "CHANGELOG.rst"]}
+dependencies = {file = "requirements/base.in"}
+
+[tool.setuptools.packages.find]
+include = ["sample_plugin*"]
+exclude = ["sample_plugin.tests*"]

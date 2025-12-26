@@ -1,6 +1,4 @@
 # Core requirements for using this application
--c constraints.txt
-
 Django             # Web application framework
 djangorestframework  # REST API framework
 django-filter      # Filtering for DRF
