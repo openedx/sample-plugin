@@ -129,40 +129,13 @@ README = open(os.path.join(os.path.dirname(__file__), 'README.rst'), encoding="u
 CHANGELOG = open(os.path.join(os.path.dirname(__file__), 'CHANGELOG.rst'), encoding="utf8").read()
 
 setup(
-    name='openedx_sample_plugin',
     version=VERSION,
-    description="""A sample backend plugin for the Open edX Platform""",
     long_description=README + '\n\n' + CHANGELOG,
-    author='Open edX Project',
-    author_email='oscm@openedx.org',
-    url='https://github.com/openedx/sample-plugin',
     packages=find_packages(
         include=['sample_plugin', 'sample_plugin.*'],
         exclude=["*tests"],
     ),
-
     include_package_data=True,
     install_requires=load_requirements('requirements/base.in'),
-    python_requires=">=3.11",
-    license="Apache Software License 2.0",
     zip_safe=False,
-    keywords='Python edx',
-    classifiers=[
-        'Development Status :: 3 - Alpha',
-        'Framework :: Django',
-        'Framework :: Django :: 4.2',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: Apache Software License',
-        'Natural Language :: English',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.12',
-    ],
-    entry_points={
-        'lms.djangoapp': [
-            'sample_plugin = sample_plugin.apps:SamplePluginConfig',
-        ],
-        'cms.djangoapp': [
-            'sample_plugin = sample_plugin.apps:SamplePluginConfig',
-        ],
-    },
 )
