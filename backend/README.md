@@ -59,7 +59,7 @@ class SamplePluginConfig(AppConfig):
                 "common": {PluginURLs.RELATIVE_PATH: "settings.common"},
                 "production": {PluginURLs.RELATIVE_PATH: "settings.production"},
             },
-            # ... CMS configuration  
+            # ... CMS configuration
         }
     }
 ```
@@ -74,24 +74,21 @@ class SamplePluginConfig(AppConfig):
 
 ### Entry Points Configuration
 
-In [`setup.py`](./setup.py), the plugin registers itself with edx-platform:
+In [`pyproject.toml`](./backend/pyproject.toml), the plugin registers itself with edx-platform:
 
 ```python
-entry_points={
-    "lms.djangoapp": [
-        "sample_plugin = sample_plugin.apps:SamplePluginConfig",
-    ],
-    "cms.djangoapp": [
-        "sample_plugin = sample_plugin.apps:SamplePluginConfig", 
-    ],
-}
+[project.entry-points."lms.djangoapp"]
+sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+
+[project.entry-points."cms.djangoapp"]
+sample_plugin = "sample_plugin.apps:SamplePluginConfig"
 ```
 
 **Why this works**: The platform automatically discovers and loads any Django app registered in these entry points.
 
 ## Models & Database
 
-**File**: [`sample_plugin/models.py`](./sample_plugin/models.py)  
+**File**: [`sample_plugin/models.py`](./sample_plugin/models.py)
 **Official Docs**: [OEP-49: Django App Patterns](https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0049-django-app-patterns.html)
 
 ### CourseArchiveStatus Model
@@ -133,7 +130,7 @@ The model includes PII documentation:
 
 ## API Endpoints
 
-**File**: [`sample_plugin/views.py`](./sample_plugin/views.py)  
+**File**: [`sample_plugin/views.py`](./sample_plugin/views.py)
 **URLs**: [`sample_plugin/urls.py`](./sample_plugin/urls.py)
 
 ### REST API Implementation
@@ -182,7 +179,7 @@ def perform_create(self, serializer):
 
 ## Events & Signals
 
-**File**: [`sample_plugin/signals.py`](./sample_plugin/signals.py)  
+**File**: [`sample_plugin/signals.py`](./sample_plugin/signals.py)
 **Official Docs**: [Open edX Events Guide](https://docs.openedx.org/projects/openedx-events/en/latest/)
 
 ### Event Handler Example
@@ -241,7 +238,7 @@ def ready(self):
 
 ## Filters & Pipeline Steps
 
-**File**: [`sample_plugin/pipeline.py`](./sample_plugin/pipeline.py)  
+**File**: [`sample_plugin/pipeline.py`](./sample_plugin/pipeline.py)
 **Official Docs**: [Using Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html)
 
 ### Filter Implementation
@@ -254,12 +251,12 @@ class ChangeCourseAboutPageUrl(PipelineStep):
         # Extract course ID from URL
         pattern = r'(?P<course_id>course-v1:[^/]+)'
         match = re.search(pattern, url)
-        
+
         if match:
             course_id = match.group('course_id')
             new_url = f"https://example.com/new_about_page/{course_id}"
             return {"url": new_url, "org": org}
-        
+
         # Return original data if no match
         return {"url": url, "org": org}
 ```
@@ -278,7 +275,7 @@ class ChangeCourseAboutPageUrl(PipelineStep):
 
 **Common Filters:**
 - Course enrollment filters
-- Authentication filters  
+- Authentication filters
 - Certificate generation filters
 - Course discovery filters
 
@@ -289,7 +286,7 @@ Filters must be registered in Django settings. This happens automatically via th
 ### Real-World Use Cases
 
 - **URL Redirection**: Send users to custom course pages
-- **Access Control**: Implement custom enrollment restrictions  
+- **Access Control**: Implement custom enrollment restrictions
 - **Data Transformation**: Modify course data before display
 - **Integration**: Add custom fields to API responses
 
@@ -380,7 +377,7 @@ python manage.py cms migrate
 
 ### Verification Steps
 
-1. **Check Installation**: 
+1. **Check Installation**:
    ```bash
    python manage.py lms shell
    >>> from sample_plugin.models import CourseArchiveStatus
@@ -439,7 +436,7 @@ from django.contrib.auth import get_user_model
 class TestCourseArchiveStatusAPI(APITestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(username="testuser")
-        
+
     def test_list_archive_statuses(self):
         # Test API endpoints
         pass
@@ -492,7 +489,7 @@ Settings configure filter behavior:
 # settings/common.py
 def plugin_settings(settings):
     settings.SAMPLE_PLUGIN_REDIRECT_DOMAIN = "custom-domain.com"
-    
+
 # pipeline.py - Uses setting
 class ChangeCourseAboutPageUrl(PipelineStep):
     def run_filter(self, url, org, **kwargs):
@@ -506,15 +503,15 @@ class ChangeCourseAboutPageUrl(PipelineStep):
 ### For Your Use Case
 
 1. **Models**: Modify [`models.py`](./sample_plugin/models.py) for your data structure
-2. **APIs**: Update [`views.py`](./sample_plugin/views.py) and [`serializers.py`](./sample_plugin/serializers.py)  
+2. **APIs**: Update [`views.py`](./sample_plugin/views.py) and [`serializers.py`](./sample_plugin/serializers.py)
 3. **Events**: Change event handlers in [`signals.py`](./sample_plugin/signals.py)
 4. **Filters**: Implement your business logic in [`pipeline.py`](./sample_plugin/pipeline.py)
 5. **Settings**: Configure plugin behavior in [`settings/`](./sample_plugin/settings/)
 
 ### Plugin Development Checklist
 
-- [ ] Update `setup.py` with your plugin name and dependencies
-- [ ] Modify `apps.py` with your app configuration  
+- [ ] Update `pyproject.toml` with your plugin name and dependencies
+- [ ] Modify `apps.py` with your app configuration
 - [ ] Design your models in `models.py`
 - [ ] Create and run database migrations
 - [ ] Implement API endpoints in `views.py`

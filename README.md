@@ -106,7 +106,7 @@ Each directory contains detailed README.md files with adaptation guidance.
 ```
 sample-plugin/
 ├── README.md                           # This file - overview and quick start
-├── backend/                           
+├── backend/
 │   ├── README.md                      # Backend plugin detailed guide
 │   ├── sample_plugin/
 │   │   ├── apps.py                    # Django plugin configuration
@@ -133,7 +133,7 @@ sample-plugin/
 ### Backend Plugin Development
 
 1. **Setup**: Follow backend setup in [Quick Start](#quick-start-guide)
-2. **Development**: 
+2. **Development**:
    - Modify models in `models.py`
    - Add API endpoints in `views.py`
    - Implement event handlers in `signals.py`
@@ -187,7 +187,7 @@ const response = await client.get(
 def log_course_info_changed(signal, sender, catalog_info, **kwargs):
     logging.info(f"{catalog_info.course_key} has been updated!")
 
-# Filters: Modify course about URLs  
+# Filters: Modify course about URLs
 class ChangeCourseAboutPageUrl(PipelineStep):
     def run_filter(self, url, org, **kwargs):
         # Custom URL logic
@@ -198,7 +198,7 @@ class ChangeCourseAboutPageUrl(PipelineStep):
 ### Common Issues
 
 **Plugin not loading:**
-- Verify `setup.py` entry points are correct
+- Verify `pyproject.toml` entry points are correct
 - Check that plugin app is in INSTALLED_APPS (should be automatic)
 - Review Django app plugin configuration in `apps.py`
 
