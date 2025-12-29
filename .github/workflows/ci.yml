@@ -1,11 +1,12 @@
 name: Python CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
     branches:
       - "**"
+  # This is so we can call CI locally from other workflows that might want to
+  # run CI before doing whatever task they're doing.  Like the release workflow.
+  workflow_call:
 
 defaults:
   run:
