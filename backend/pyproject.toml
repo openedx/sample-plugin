@@ -46,5 +46,4 @@ include = ["sample_plugin*"]
 exclude = ["sample_plugin.tests*"]
 
 [tool.semantic_release.changelog.default_templates]
-changelog_file = "CHANGELOG.rst"
-output_format = "rst"
+changelog_file = "../CHANGELOG.md"
