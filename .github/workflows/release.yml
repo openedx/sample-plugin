@@ -51,7 +51,7 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ steps.release.outputs.tag }}
-        working-directory: './backend'
+          directory: './backend'
 
       - name: Upload | Distribution Artifacts
         uses: actions/upload-artifact@v4
