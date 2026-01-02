@@ -44,6 +44,3 @@ dependencies = {file = "requirements/base.in"}
 [tool.setuptools.packages.find]
 include = ["sample_plugin*"]
 exclude = ["sample_plugin.tests*"]
-
-[tool.semantic_release.changelog.default_templates]
-changelog_file = "../CHANGELOG.md"
