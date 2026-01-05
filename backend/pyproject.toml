@@ -37,7 +37,7 @@ Homepage = "https://openedx.org/openedx/sample-plugin"
 Repository = "https://openedx.org/openedx/sample-plugin"
 
 [tool.setuptools.dynamic]
-readme = {file = ["README.rst", "CHANGELOG.rst"]}
+readme = {file = ["README.md"], content-type = "text/markdown" }
 dependencies = {file = "requirements/base.in"}
 
 [tool.setuptools.packages.find]
