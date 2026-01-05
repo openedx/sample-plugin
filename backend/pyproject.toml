@@ -19,7 +19,7 @@ classifiers = [
     'Programming Language :: Python :: 3',
     'Programming Language :: Python :: 3.12',
 ]
-keywords= [
+keywords = [
     "Python",
     "edx",
 ]
@@ -50,3 +50,5 @@ build_command = "pip install build && python -m build"
 [tool.setuptools_scm]
 # The root for the gith repo is one directory up.
 root = ".."
+version_scheme = 'only-version'
+local_scheme = 'no-local-version'
