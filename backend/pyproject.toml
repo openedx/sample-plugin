@@ -45,7 +45,12 @@ include = ["sample_plugin*"]
 exclude = ["sample_plugin.tests*"]
 
 [tool.semantic_release]
-build_command = "pip install build && python -m build"
+# We use SETUPTOOLS_SCM_PRETEND_VERSION to pull the version from python-semantic-release instead
+# of actually pulling it from version control because the build step happens before the repo gets
+# tagged. Setuptools by default doesn't have any way of overriding the version number at build
+# time without a setup.py file.  This is a fine alternative that reduces the amount of boilerplate
+# code and files we need in this repo.
+build_command = "pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=$NEW_VERSION python -m build"
 
 [tool.semantic_release.commit_parser_options]
 # Because this repo is meant to be an example, docs changes are relevant
