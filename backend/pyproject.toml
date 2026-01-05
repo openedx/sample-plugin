@@ -47,3 +47,6 @@ exclude = ["sample_plugin.tests*"]
 
 [tool.semantic_release]
 build_command = "pip install build && python -m build"
+version_tomp = [
+    "pyproject.toml:project.version"
+]
