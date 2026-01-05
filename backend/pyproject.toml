@@ -47,6 +47,11 @@ exclude = ["sample_plugin.tests*"]
 [tool.semantic_release]
 build_command = "pip install build && python -m build"
 
+[tool.semantic_release.commit_parser_options]
+# Because this repo is meant to be an example, docs changes are relevant
+# feature changes and so should produces new releases.
+minor_tags = ["feat", "docs"]
+
 [tool.setuptools_scm]
 # The root for the gith repo is one directory up.
 root = ".."
