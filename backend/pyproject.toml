@@ -46,4 +46,4 @@ include = ["sample_plugin*"]
 exclude = ["sample_plugin.tests*"]
 
 [tool.semantic_release]
-build_command = "python -m build"
+build_command = "pip install build && python -m build"
