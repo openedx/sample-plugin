@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools", "setuptools-scm>8.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -7,7 +7,6 @@ name = "openedx-sample-plugin"
 description = "A sample backend plugin for the Open edX Platform"
 requires-python = ">=3.11"
 license="Apache-2.0"
-version = "0.1.0"
 authors = [
     {name = "Open edX Project", email = "oscm@openedx.org"},
 ]
@@ -25,7 +24,7 @@ keywords= [
     "edx",
 ]
 
-dynamic = ["readme", "dependencies"]
+dynamic = ["readme", "dependencies", "version"]
 
 [project.entry-points."lms.djangoapp"]
 sample_plugin = "sample_plugin.apps:SamplePluginConfig"
@@ -47,6 +46,7 @@ exclude = ["sample_plugin.tests*"]
 
 [tool.semantic_release]
 build_command = "pip install build && python -m build"
-version_toml = [
-    "pyproject.toml:project.version"
-]
+
+[tool.setuptools_scm]
+# The root for the gith repo is one directory up.
+root = ".."
