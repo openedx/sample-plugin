@@ -1,6 +1,6 @@
 {
   "name": "@openedx/sample-plugin",
-  "version": "0.0.1",
+  "version": "__semantically__released__",
   "main": "src/index.jsx",
   "peerDependencies": {
     "@edx/frontend-platform": "*",
