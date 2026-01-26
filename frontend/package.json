@@ -2,6 +2,7 @@
   "name": "@openedx/sample-plugin",
   "version": "__semantically__released__",
   "main": "src/index.jsx",
+  "repository": "https://github.com/openedx/sample-plugin",
   "peerDependencies": {
     "@edx/frontend-platform": "*",
     "@openedx/paragon": "*",
