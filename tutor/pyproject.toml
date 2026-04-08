@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm>8.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tutor-sample-plugin"
+description = "Tutor plugin for the Open edX Sample Plugin"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+authors = [
+    {name = "Open edX Project", email = "oscm@openedx.org"},
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+]
+keywords = ["tutor", "openedx", "plugin"]
+dependencies = ["tutor>=17.0.0"]
+dynamic = ["readme", "version"]
+
+[project.entry-points."tutor.plugin.v1"]
+sample_plugin = "tutorsampleplugin.plugin"
+
+[project.urls]
+Homepage = "https://github.com/openedx/sample-plugin"
+Repository = "https://github.com/openedx/sample-plugin"
+
+[tool.setuptools.dynamic]
+readme = {file = ["README.md"], content-type = "text/markdown"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tutorsampleplugin*"]
+
+[tool.setuptools_scm]
+# The root for the git repo is one directory up.
+root = ".."
+version_scheme = "only-version"
+local_scheme = "no-local-version"
