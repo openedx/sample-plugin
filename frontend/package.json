@@ -1,11 +1,18 @@
 {
   "name": "@openedx/sample-plugin",
   "version": "__semantically__released__",
-  "main": "src/index.jsx",
+  "main": "dist/index.js",
+  "files": ["dist"],
   "repository": "https://github.com/openedx/sample-plugin",
+  "scripts": {
+    "build": "fedx-scripts babel src --out-dir dist --source-maps --ignore **/*.test.jsx,**/*.test.js"
+  },
   "peerDependencies": {
     "@edx/frontend-platform": "*",
     "@openedx/paragon": "*",
     "react": "*"
+  },
+  "devDependencies": {
+    "@openedx/frontend-build": "*"
   }
 }
