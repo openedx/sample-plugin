@@ -32,6 +32,15 @@ hooks.Filters.ENV_PATCHES.add_item((
 ))
 
 # ---------------------------------------------------------------------------
+# Migrations: Run sample_plugin migrations on init
+# ---------------------------------------------------------------------------
+
+hooks.Filters.CLI_DO_INIT_TASKS.add_item((
+    "lms",
+    "./manage.py lms migrate sample_plugin",
+))
+
+# ---------------------------------------------------------------------------
 # Frontend: Install npm package and configure the learner-dashboard slot
 # ---------------------------------------------------------------------------
 # Only runs when tutor-mfe is installed, so the plugin degrades gracefully
