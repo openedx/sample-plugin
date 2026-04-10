@@ -54,12 +54,29 @@ jobs:
           tag: ${{ steps.release.outputs.tag }}
           directory: './backend'
 
-      - name: Upload | Distribution Artifacts
+      - name: Upload | Backend Distribution Artifacts
         uses: actions/upload-artifact@v4
         if: steps.release.outputs.released == 'true'
         with:
-          name: distribution-artifacts
+          name: backend-distribution-artifacts
           path: backend/dist
+          if-no-files-found: error
+
+      - name: Build | Tutor Plugin
+        # The tutor plugin does not use python-semantic-release directly.
+        # Instead it shares the version determined by the backend's semantic
+        # release above, passed in via SETUPTOOLS_SCM_PRETEND_VERSION so that
+        # setuptools-scm picks it up at build time.
+        if: steps.release.outputs.released == 'true'
+        run: pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.release.outputs.version }} python -m build
+        working-directory: './tutor'
+
+      - name: Upload | Tutor Plugin Distribution Artifacts
+        uses: actions/upload-artifact@v4
+        if: steps.release.outputs.released == 'true'
+        with:
+          name: tutor-distribution-artifacts
+          path: tutor/dist
           if-no-files-found: error
 
     outputs:
@@ -84,13 +101,36 @@ jobs:
         uses: actions/download-artifact@v4
         id: artifact-download
         with:
-          name: distribution-artifacts
+          name: backend-distribution-artifacts
           path: backend/dist
 
       - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: backend/dist
+          user: __token__
+          password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
+
+  publish_tutor_plugin_to_pypi:
+    runs-on: ubuntu-latest
+    needs: release
+    if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Setup | Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: tutor-distribution-artifacts
+          path: tutor/dist
+
+      - name: Publish to PyPi
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: tutor/dist
           user: __token__
           password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
 
