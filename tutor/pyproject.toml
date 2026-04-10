@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm>8.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tutor-sample-plugin"
+name = "tutor-contrib-sample-plugin"
 description = "Tutor plugin for the Open edX Sample Plugin"
 requires-python = ">=3.11"
 license = "Apache-2.0"
