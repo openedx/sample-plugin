@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "openedx-sample-plugin"
 description = "A sample backend plugin for the Open edX Platform"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license="Apache-2.0"
 authors = [
     {name = "Open edX Project", email = "oscm@openedx.org"},
@@ -61,9 +61,9 @@ test = [
     {include-group = "test-base"},
     "Django>=5.0,<6.0",
 ]
-django42 = [
+django60 = [
     {include-group = "test-base"},
-    "Django>=4.0,<5.0",
+    "Django>=6.0,<7.0",
 ]
 quality = [
     {include-group = "test"},
@@ -123,7 +123,7 @@ local_scheme = 'no-local-version'
 # new pair here whenever you add a legacy-version group to [dependency-groups].
 # See docs/how-tos/adding-a-matrix-dependency.rst for the full process.
 conflicts = [
-    [{group = "test"}, {group = "django42"}],
+    [{group = "test"}, {group = "django60"}],
 ]
 #  DO NOT EDIT constraint-dependencies DIRECTLY.
 #  This list is managed by `edx_lint write_uv_constraints`
@@ -131,7 +131,7 @@ conflicts = [
 #  - GLOBAL constraints: edit edx_lint/files/common_constraints.txt
 #  - REPO-SPECIFIC constraints: edit [tool.edx_lint].uv_constraints in this file
 constraint-dependencies = [
-    "Django<6.0",
+    "Django<7.0",
     "elasticsearch<7.14.0",
 ]
 
