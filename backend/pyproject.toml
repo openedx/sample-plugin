@@ -24,7 +24,17 @@ keywords = [
     "edx",
 ]
 
-dynamic = ["readme", "dependencies", "version"]
+dynamic = ["readme", "version"]
+
+dependencies = [
+    "Django",
+    "djangorestframework",
+    "django-filter",
+    "edx-opaque-keys",
+    "openedx-events",
+    "openedx-filters",
+    "openedx-atlas",
+]
 
 [project.entry-points."lms.djangoapp"]
 sample_plugin = "sample_plugin.apps:SamplePluginConfig"
@@ -36,9 +46,42 @@ sample_plugin = "sample_plugin.apps:SamplePluginConfig"
 Homepage = "https://openedx.org/openedx/sample-plugin"
 Repository = "https://openedx.org/openedx/sample-plugin"
 
+[dependency-groups]
+test = [
+    "pytest-cov",
+    "pytest-django",
+    "code-annotations",
+    "edx-django-utils",
+    "django-extensions",
+]
+quality = [
+    {include-group = "test"},
+    "edx-lint",
+    "isort",
+    "pycodestyle",
+    "pydocstyle",
+]
+doc = [
+    {include-group = "test"},
+    "doc8",
+    "sphinx-book-theme",
+    "twine",
+    "build",
+    "Sphinx",
+]
+ci = [
+    "tox",
+    "tox-uv",
+]
+dev = [
+    {include-group = "quality"},
+    {include-group = "ci"},
+    "diff-cover",
+    "edx-i18n-tools",
+]
+
 [tool.setuptools.dynamic]
 readme = {file = ["README.md"], content-type = "text/markdown" }
-dependencies = {file = "requirements/base.in"}
 
 [tool.setuptools.packages.find]
 include = ["sample_plugin*"]
@@ -62,3 +105,22 @@ minor_tags = ["feat", "docs"]
 root = ".."
 version_scheme = 'only-version'
 local_scheme = 'no-local-version'
+
+[tool.uv]
+#  DO NOT EDIT constraint-dependencies DIRECTLY.
+#  This list is managed by `edx_lint write_uv_constraints`
+#  and will be overwritten the next time `make upgrade` is run.
+#  - GLOBAL constraints: edit edx_lint/files/common_constraints.txt
+#  - REPO-SPECIFIC constraints: edit [tool.edx_lint].uv_constraints in this file
+constraint-dependencies = [
+    "Django<6.0",
+    "elasticsearch<7.14.0",
+]
+
+[tool.edx_lint]
+# Repo-specific uv constraints merged with edx-lint's global constraints.
+# Local entries override global ones for the same package.
+# Run `make upgrade` to regenerate [tool.uv].constraint-dependencies.
+uv_constraints = [
+    "Django<7.0",  # this repo tests against Django 6.x; overrides the global Django<6.0 constraint
+]
