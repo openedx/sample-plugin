@@ -32,25 +32,12 @@ docs: ## generate Sphinx HTML documentation, including API docs
 	tox -e docs
 	$(BROWSER)docs/_build/html/index.html
 
-# Define PIP_COMPILE_OPTS=-v to get more information during make upgrade.
-PIP_COMPILE = pip-compile $(PIP_COMPILE_OPTS)
+compile-requirements: ## generate the uv.lock file without upgrading packages
+	uv lock
 
-compile-requirements: export CUSTOM_COMPILE_COMMAND=make upgrade
-compile-requirements: piptools ## compile the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	pip-compile -v ${PIP_COMPILE_OPTS} --allow-unsafe --rebuild -o requirements/pip-tools.txt requirements/pip-tools.in
-	pip install -qr requirements/pip-tools.txt
-	$(PIP_COMPILE) -c requirements/constraints.txt -o requirements/base.txt requirements/base.in
-	$(PIP_COMPILE) -o requirements/test.txt requirements/test.in
-	$(PIP_COMPILE) -o requirements/doc.txt requirements/doc.in
-	$(PIP_COMPILE) -o requirements/quality.txt requirements/quality.in
-	$(PIP_COMPILE) -o requirements/ci.txt requirements/ci.in
-	$(PIP_COMPILE) -o requirements/dev.txt requirements/dev.in
-	# Let tox control the Django version for tests
-	sed '/^[dD]jango==/d' requirements/test.txt > requirements/test.tmp
-	mv requirements/test.tmp requirements/test.txt
-
-upgrade: piptools ## update the requirements/*.txt files with the latest packages satisfying requirements/*.in
-	$(MAKE) compile-requirements PIP_COMPILE_OPTS="--upgrade"
+upgrade: ## upgrade all packages in uv.lock and sync constraints from edx-lint
+	uv run --with edx-lint edx_lint write_uv_constraints pyproject.toml
+	uv lock --upgrade
 
 quality: ## check coding style with pycodestyle and pylint
 	tox -e quality
@@ -58,13 +45,8 @@ quality: ## check coding style with pycodestyle and pylint
 pii_check: ## check for PII annotations on all Django models
 	tox -e pii_check
 
-piptools: ## install pinned version of pip-compile and pip-sync
-	# pip install -r requirements/pip-tools.txt
-
-requirements: clean_tox piptools ## install development environment requirements
-	pip-sync -q requirements/dev.txt requirements/private.*
-	# So that the plugin entrypoints are installed and loaded correctly.
-	pip install -e .
+requirements: clean_tox ## install development environment requirements
+	uv sync --group dev
 
 test: clean ## run tests in the current virtualenv
 	pytest
