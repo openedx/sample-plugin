@@ -47,12 +47,23 @@ Homepage = "https://openedx.org/openedx/sample-plugin"
 Repository = "https://openedx.org/openedx/sample-plugin"
 
 [dependency-groups]
-test = [
+test-base = [
     "pytest-cov",
     "pytest-django",
     "code-annotations",
     "edx-django-utils",
     "django-extensions",
+]
+# Current default Django version used by quality, docs, and the default test
+# matrix entry. When adding or retiring a Django version from the matrix, see
+# docs/how-tos/adding-a-matrix-dependency.rst for the full process.
+test = [
+    {include-group = "test-base"},
+    "Django>=5.0,<6.0",
+]
+django42 = [
+    {include-group = "test-base"},
+    "Django>=4.0,<5.0",
 ]
 quality = [
     {include-group = "test"},
@@ -107,6 +118,13 @@ version_scheme = 'only-version'
 local_scheme = 'no-local-version'
 
 [tool.uv]
+# Each entry lists groups with mutually exclusive version requirements so uv can
+# produce a single uv.lock that contains a separate resolution for each. Add a
+# new pair here whenever you add a legacy-version group to [dependency-groups].
+# See docs/how-tos/adding-a-matrix-dependency.rst for the full process.
+conflicts = [
+    [{group = "test"}, {group = "django42"}],
+]
 #  DO NOT EDIT constraint-dependencies DIRECTLY.
 #  This list is managed by `edx_lint write_uv_constraints`
 #  and will be overwritten the next time `make upgrade` is run.
