@@ -95,6 +95,7 @@ dev = [
 readme = {file = ["README.md"], content-type = "text/markdown" }
 
 [tool.setuptools.packages.find]
+where = ["src"]
 include = ["sample_plugin*"]
 exclude = ["sample_plugin.tests*"]
 
