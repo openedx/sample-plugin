@@ -1,5 +1,5 @@
 """
-Open edX Events signal handlers for the sample_plugin application.
+Open edX Events signal handlers for the openedx_sample_plugin application.
 
 This module demonstrates how to consume Open edX Events (signals) to react to
 platform activities and integrate with external systems. Events are part of

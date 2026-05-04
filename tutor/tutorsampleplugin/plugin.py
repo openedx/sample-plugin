@@ -22,13 +22,6 @@ except ImportError:
 # Backend: Install the Django app plugin into LMS and CMS images
 # ---------------------------------------------------------------------------
 
-# If a directory named "backend" has been moutned with `tutor mount add`, then
-# this line will ensure that the directory gets mapped into the openedx[-dev]
-# image and into the container's virtualenv. When there is no such directory
-# mounted, this line has no effect (thus it's safe for it to exist in the
-# production version of the plugin).
-hooks.Filters.MOUNTED_DIRECTORIES.add_item(("openedx", "backend"))
-
 # The openedx-dockerfile-post-python-requirements patch runs after pip
 # installs the base Open edX requirements. Plugins installed here are
 # available in both LMS and CMS containers.
@@ -39,12 +32,12 @@ hooks.Filters.ENV_PATCHES.add_item((
 ))
 
 # ---------------------------------------------------------------------------
-# Migrations: Run sample_plugin migrations on init
+# Migrations: Run openedx_sample_plugin migrations on init
 # ---------------------------------------------------------------------------
 
 hooks.Filters.CLI_DO_INIT_TASKS.add_item((
     "lms",
-    "./manage.py lms migrate sample_plugin",
+    "./manage.py lms migrate openedx_sample_plugin",
 ))
 
 # ---------------------------------------------------------------------------
@@ -93,7 +86,7 @@ if _tutormfe_available:
         {
           op: PLUGIN_OPERATIONS.Insert,
           widget: {
-            id: 'sample_plugin_course_list',
+            id: 'openedx_sample_plugin_course_list',
             type: DIRECT_PLUGIN,
             priority: 50,
             RenderWidget: CourseList,

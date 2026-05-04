@@ -10,7 +10,7 @@ on:
 
 defaults:
   run:
-    working-directory: "./backend"
+    working-directory: "./platform-plugin-sample"
 
 jobs:
   run_tests:
@@ -46,4 +46,4 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           flags: unittests
           fail_ci_if_error: true
-          working-directory: "./backend"
+          working-directory: "./platform-plugin-sample"

@@ -1,5 +1,5 @@
 """
-Common settings for the sample_plugin application.
+Common settings for the openedx_sample_plugin application.
 
 This module demonstrates how Django App Plugins integrate with the platform's
 settings system. Plugin settings are merged with the main settings during
@@ -97,7 +97,7 @@ def _configure_openedx_filters(settings):
 
     # Filter we want to register
     filter_name = "org.openedx.learning.course_about.page.url.requested.v1"
-    our_pipeline_step = "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
+    our_pipeline_step = "openedx_sample_plugin.pipeline.ChangeCourseAboutPageUrl"
 
     # Check if this filter already has configuration
     if filter_name in filters_config:

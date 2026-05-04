@@ -29,9 +29,9 @@ This sample plugin showcases the **Open edX Hooks Extension Framework**, which a
 
 | Plugin Type | What It Does | Official Documentation | Sample Code | When To Use |
 |-------------|--------------|------------------------|-------------|-------------|
-| **Django App Plugin** | Add models, APIs, views, and business logic | [How to create a plugin app](https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html) | [`backend/`](./backend/) | Adding new functionality, APIs, or data models |
-| **Events (Signals)** | React to platform events | [Open edX Events Guide](https://docs.openedx.org/projects/openedx-events/en/latest/) | [`backend/sample_plugin/signals.py`](./backend/sample_plugin/signals.py) | Integrating with external systems, audit logging |
-| **Filters** | Modify platform behavior | [Using Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html) | [`backend/sample_plugin/pipeline.py`](./backend/sample_plugin/pipeline.py) | Customizing business logic, URL redirects |
+| **Django App Plugin** | Add models, APIs, views, and business logic | [How to create a plugin app](https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html) | [`platform-plugin-sample/`](./platform-plugin-sample/) | Adding new functionality, APIs, or data models |
+| **Events (Signals)** | React to platform events | [Open edX Events Guide](https://docs.openedx.org/projects/openedx-events/en/latest/) | [`platform-plugin-sample/openedx_sample_plugin/signals.py`](./platform-plugin-sample/openedx_sample_plugin/signals.py) | Integrating with external systems, audit logging |
+| **Filters** | Modify platform behavior | [Using Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html) | [`platform-plugin-sample/openedx_sample_plugin/pipeline.py`](./platform-plugin-sample/openedx_sample_plugin/pipeline.py) | Customizing business logic, URL redirects |
 | **Frontend Slots** | Customize MFE interfaces | [Frontend Plugin Slots](https://docs.openedx.org/en/latest/site_ops/how-tos/use-frontend-plugin-slots.html) | [`frontend/`](./frontend/) | UI customization, adding new components |
 | **Brand Packages** | Customize theming | [Open edX Brand Package Interface](https://github.com/openedx/brand-openedx) | [`brand/`](./brand/) | UI theming |
 | **Tutor Plugin** | Deploy plugins easily | [Tutor Plugin Development](https://docs.tutor.edly.io/) | [`tutor/`](./tutor/) | Simplified deployment and configuration |
@@ -46,9 +46,13 @@ This sample plugin showcases the **Open edX Hooks Extension Framework**, which a
 ### Option 1: Development with Tutor (Recommended)
 
 ```bash
-# Backend plugin setup
-tutor mounts add "$PWD/backend"
-tutor dev launch  # Rebuilds image, runs migrations, reboots containers.
+# Bind-mount backend source into Tutor image and containers.
+# Tutor automatically recognizes the `platform-plugin-*` prefix and knows to
+# treat it as an openedx-platform plugin.
+tutor mounts add "$PWD/platform-plugin-sample"
+
+# Rebuild image, run migrations, reboot containers:
+tutor dev launch  
 
 # Frontend Plugin Setup (for learner-dashboard MFE development)
 npm install $PWD/frontend
@@ -60,7 +64,7 @@ npm start
 
 ```bash
 # In your edx-platform directory
-pip install -e /path/to/sample-plugin/backend
+pip install -e /path/to/sample-plugin/platform-plugin-sample
 
 # Enable Learner Dashboard MFE
 # Go to http://localhost:18000/admin/waffle/flag/
@@ -87,9 +91,9 @@ python manage.py lms migrate
 Use the table above to identify which type of plugin matches your needs. You can combine multiple types in one plugin.
 
 ### 3. Study the Sample Code
-- **Backend**: Start with [`backend/sample_plugin/apps.py`](./backend/sample_plugin/apps.py) to understand plugin registration
-- **Events**: Examine [`backend/sample_plugin/signals.py`](./backend/sample_plugin/signals.py) for event handling patterns
-- **Filters**: Review [`backend/sample_plugin/pipeline.py`](./backend/sample_plugin/pipeline.py) for behavior modification
+- **Backend**: Start with [`platform-plugin-sample/openedx_sample_plugin/apps.py`](./platform-plugin-sample/openedx_sample_plugin/apps.py) to understand plugin registration
+- **Events**: Examine [`platform-plugin-sample/openedx_sample_plugin/signals.py`](./platform-plugin-sample/openedx_sample_plugin/signals.py) for event handling patterns
+- **Filters**: Review [`platform-plugin-sample/openedx_sample_plugin/pipeline.py`](./platform-plugin-sample/openedx_sample_plugin/pipeline.py) for behavior modification
 - **Frontend**: Explore [`frontend/src/plugin.jsx`](./frontend/src/plugin.jsx) for UI customization
 
 ### 4. Run This Sample
@@ -103,9 +107,9 @@ Each directory contains detailed README.md files with adaptation guidance.
 ```
 sample-plugin/
 ├── README.md                           # This file - overview and quick start
-├── backend/
+├── platform-plugin-sample/
 │   ├── README.md                      # Backend plugin detailed guide
-│   ├── sample_plugin/
+│   ├── openedx_sample_plugin/
 │   │   ├── apps.py                    # Django plugin configuration
 │   │   ├── models.py                  # Database models example
 │   │   ├── views.py                   # REST API endpoints
@@ -122,7 +126,7 @@ sample-plugin/
 │   └── package.json                   # NPM package configuration
 └── tutor/
     ├── README.md                      # Tutor deployment guide
-    └── sample_plugin.py               # Tutor plugin configuration
+    └── openedx_sample_plugin.py               # Tutor plugin configuration
 ```
 
 ## Development Workflows
@@ -135,10 +139,10 @@ sample-plugin/
    - Add API endpoints in `views.py`
    - Implement event handlers in `signals.py`
    - Create filters in `pipeline.py`
-3. **Testing**: `cd backend && make test`
-4. **Quality**: `cd backend && make quality`
+3. **Testing**: `cd platform-plugin-sample && make test`
+4. **Quality**: `cd platform-plugin-sample && make quality`
 
-**Detailed Guide**: See [`backend/README.md`](./backend/README.md)
+**Detailed Guide**: See [`platform-plugin-sample/README.md`](./platform-plugin-sample/README.md)
 
 ### Frontend Plugin Development
 
@@ -164,7 +168,7 @@ This sample shows how backend and frontend plugins work together:
 ### Backend + Frontend Integration
 
 ```python
-# backend/sample_plugin/views.py - Provides API
+# platform-plugin-sample/openedx_sample_plugin/views.py - Provides API
 class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     # API implementation
 ```

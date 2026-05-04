@@ -11,7 +11,7 @@ from opaque_keys.edx.keys import CourseKey
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from sample_plugin.models import CourseArchiveStatus
+from openedx_sample_plugin.models import CourseArchiveStatus
 
 User = get_user_model()
 
@@ -87,7 +87,7 @@ def test_list_course_archive_status_authenticated(
     Test that an authenticated user can list their own course archive statuses.
     """
     api_client.force_authenticate(user=user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
@@ -106,7 +106,7 @@ def test_list_course_archive_status_unauthenticated(api_client):
     """
     Test that an unauthenticated user cannot list course archive statuses.
     """
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_403_FORBIDDEN
@@ -130,7 +130,7 @@ def test_list_course_archive_status_staff_can_see_all(
     )
 
     api_client.force_authenticate(user=staff_user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     response = api_client.get(url)
 
     assert response.status_code == status.HTTP_200_OK
@@ -143,7 +143,7 @@ def test_create_course_archive_status(api_client, user, course_key):
     Test that a user can create a course archive status.
     """
     api_client.force_authenticate(user=user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "user": user.id,
@@ -173,7 +173,7 @@ def test_create_course_archive_status_for_another_user(
     Test that a regular user cannot create a course archive status for another user.
     """
     api_client.force_authenticate(user=user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "user": another_user.id,
@@ -192,7 +192,7 @@ def test_staff_create_course_archive_status_for_another_user(
     Test that a staff user can create a course archive status for another user.
     """
     api_client.force_authenticate(user=staff_user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "user": user.id,
@@ -214,7 +214,7 @@ def test_update_course_archive_status(api_client, user, course_archive_status):
     """
     api_client.force_authenticate(user=user)
     url = reverse(
-        "sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
+        "openedx_sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
     )
     data = {"is_archived": True}
     response = api_client.patch(url, data, format="json")
@@ -236,7 +236,7 @@ def test_delete_course_archive_status(api_client, user, course_archive_status):
     """
     api_client.force_authenticate(user=user)
     url = reverse(
-        "sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
+        "openedx_sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
     )
     response = api_client.delete(url)
 
@@ -253,7 +253,7 @@ def test_cannot_update_other_user_course_archive_status(
     """
     api_client.force_authenticate(user=another_user)
     url = reverse(
-        "sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
+        "openedx_sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
     )
     data = {"is_archived": True}
     response = api_client.patch(url, data, format="json")
@@ -270,7 +270,7 @@ def test_staff_can_update_other_user_course_archive_status(
     """
     api_client.force_authenticate(user=staff_user)
     url = reverse(
-        "sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
+        "openedx_sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
     )
     data = {"is_archived": True}
     response = api_client.patch(url, data, format="json")
@@ -287,7 +287,7 @@ def test_create_course_archive_status_without_user_field(api_client, user, cours
     The user field should default to the current user.
     """
     api_client.force_authenticate(user=user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "is_archived": True,
@@ -321,7 +321,7 @@ def test_update_course_archive_status_without_user_field(api_client, user, cours
     """
     api_client.force_authenticate(user=user)
     url = reverse(
-        "sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
+        "openedx_sample_plugin:course-archive-status-detail", args=[course_archive_status.id]
     )
     data = {"is_archived": True}
     # Note: No "user" field in data
@@ -346,7 +346,7 @@ def test_staff_create_with_explicit_user_override(
     Test that staff can explicitly set user field to override default behavior.
     """
     api_client.force_authenticate(user=staff_user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "user": user.id,
@@ -381,7 +381,7 @@ def test_staff_update_with_explicit_user_override(
 
     api_client.force_authenticate(user=staff_user)
     url = reverse(
-        "sample_plugin:course-archive-status-detail", args=[initial_status.id]
+        "openedx_sample_plugin:course-archive-status-detail", args=[initial_status.id]
     )
     data = {
         "user": another_user.id,
@@ -407,7 +407,7 @@ def test_regular_user_cannot_override_user_field_create(
     Test that regular users cannot override user field to create records for other users.
     """
     api_client.force_authenticate(user=user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "user": another_user.id,  # Try to create for another user
@@ -426,7 +426,7 @@ def test_staff_create_without_user_field_defaults_to_current_user(
     Test that even staff users get records created for themselves when no user specified.
     """
     api_client.force_authenticate(user=staff_user)
-    url = reverse("sample_plugin:course-archive-status-list")
+    url = reverse("openedx_sample_plugin:course-archive-status-list")
     data = {
         "course_id": str(course_key),
         "is_archived": True,

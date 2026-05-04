@@ -1,8 +1,8 @@
 """
-Test settings for the sample_plugin application.
+Test settings for the openedx_sample_plugin application.
 """
 
-from sample_plugin.settings.common import plugin_settings as common_settings
+from openedx_sample_plugin.settings.common import plugin_settings as common_settings
 
 
 def plugin_settings(settings):

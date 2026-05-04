@@ -1,5 +1,5 @@
 """
-Open edX Filters implementation for the sample_plugin application.
+Open edX Filters implementation for the openedx_sample_plugin application.
 
 This module demonstrates how to use Open edX Filters to modify platform behavior
 without changing core code. Filters are part of the Hooks Extension Framework
@@ -62,7 +62,7 @@ class ChangeCourseAboutPageUrl(PipelineStep):
             settings.OPEN_EDX_FILTERS_CONFIG = {
                 "org.openedx.learning.course.about.render.started.v1": {
                     "pipeline": [
-                        "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
+                        "openedx_sample_plugin.pipeline.ChangeCourseAboutPageUrl"
                     ],
                     "fail_silently": False,
                 }

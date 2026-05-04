@@ -1,5 +1,5 @@
 """
-Views for the sample_plugin app.
+Views for the openedx_sample_plugin app.
 """
 
 import logging
@@ -13,8 +13,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.throttling import UserRateThrottle
 
-from sample_plugin.models import CourseArchiveStatus
-from sample_plugin.serializers import CourseArchiveStatusSerializer
+from openedx_sample_plugin.models import CourseArchiveStatus
+from openedx_sample_plugin.serializers import CourseArchiveStatusSerializer
 
 logger = logging.getLogger(__name__)
 

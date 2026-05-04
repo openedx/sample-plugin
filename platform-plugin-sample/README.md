@@ -34,7 +34,7 @@ This backend plugin demonstrates the **Open edX Django App Plugin** pattern, whi
 
 ## Django App Plugin Configuration
 
-**File**: [`sample_plugin/apps.py`](./sample_plugin/apps.py)
+**File**: [`openedx_sample_plugin/apps.py`](./openedx_sample_plugin/apps.py)
 
 ### Plugin Registration
 
@@ -42,12 +42,12 @@ The `SamplePluginConfig` class configures this app as an edx-platform plugin:
 
 ```python
 class SamplePluginConfig(AppConfig):
-    name = "sample_plugin"
+    name = "openedx_sample_plugin"
     plugin_app = {
         "url_config": {
             # Register URLs for both LMS and CMS
             "lms.djangoapp": {
-                PluginURLs.NAMESPACE: "sample_plugin",
+                PluginURLs.NAMESPACE: "openedx_sample_plugin",
                 PluginURLs.REGEX: r"^sample-plugin/",
                 PluginURLs.RELATIVE_PATH: "urls",
             },
@@ -74,21 +74,21 @@ class SamplePluginConfig(AppConfig):
 
 ### Entry Points Configuration
 
-In [`pyproject.toml`](./backend/pyproject.toml), the plugin registers itself with edx-platform:
+In [`pyproject.toml`](./pyproject.toml), the plugin registers itself with edx-platform:
 
 ```python
 [project.entry-points."lms.djangoapp"]
-sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+openedx_sample_plugin = "openedx_sample_plugin.apps:SamplePluginConfig"
 
 [project.entry-points."cms.djangoapp"]
-sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+openedx_sample_plugin = "openedx_sample_plugin.apps:SamplePluginConfig"
 ```
 
 **Why this works**: The platform automatically discovers and loads any Django app registered in these entry points.
 
 ## Models & Database
 
-**File**: [`sample_plugin/models.py`](./sample_plugin/models.py)
+**File**: [`openedx_sample_plugin/models.py`](./openedx_sample_plugin/models.py)
 **Official Docs**: [OEP-49: Django App Patterns](https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0049-django-app-patterns.html)
 
 ### CourseArchiveStatus Model
@@ -112,12 +112,12 @@ class CourseArchiveStatus(models.Model):
 
 ```bash
 # After modifying models.py
-cd backend
-python manage.py makemigrations sample_plugin
+cd platform-plugin-sample
+python manage.py makemigrations openedx_sample_plugin
 python manage.py migrate
 ```
 
-**Migration files**: Generated in [`sample_plugin/migrations/`](./sample_plugin/migrations/)
+**Migration files**: Generated in [`openedx_sample_plugin/migrations/`](./openedx_sample_plugin/migrations/)
 
 ### PII Annotations
 
@@ -130,8 +130,8 @@ The model includes PII documentation:
 
 ## API Endpoints
 
-**File**: [`sample_plugin/views.py`](./sample_plugin/views.py)
-**URLs**: [`sample_plugin/urls.py`](./sample_plugin/urls.py)
+**File**: [`openedx_sample_plugin/views.py`](./openedx_sample_plugin/views.py)
+**URLs**: [`openedx_sample_plugin/urls.py`](./openedx_sample_plugin/urls.py)
 
 ### REST API Implementation
 
@@ -179,7 +179,7 @@ def perform_create(self, serializer):
 
 ## Events & Signals
 
-**File**: [`sample_plugin/signals.py`](./sample_plugin/signals.py)
+**File**: [`openedx_sample_plugin/signals.py`](./openedx_sample_plugin/signals.py)
 **Official Docs**: [Open edX Events Guide](https://docs.openedx.org/projects/openedx-events/en/latest/)
 
 ### Event Handler Example
@@ -221,7 +221,7 @@ def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **k
 
 ### Signal Handler Registration
 
-Handlers are automatically registered via the `ready()` method in [`apps.py`](./sample_plugin/apps.py):
+Handlers are automatically registered via the `ready()` method in [`apps.py`](./openedx_sample_plugin/apps.py):
 
 ```python
 def ready(self):
@@ -238,7 +238,7 @@ def ready(self):
 
 ## Filters & Pipeline Steps
 
-**File**: [`sample_plugin/pipeline.py`](./sample_plugin/pipeline.py)
+**File**: [`openedx_sample_plugin/pipeline.py`](./openedx_sample_plugin/pipeline.py)
 **Official Docs**: [Using Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html)
 
 ### Filter Implementation
@@ -292,7 +292,7 @@ Filters must be registered in Django settings. This happens automatically via th
 
 ## Settings Configuration
 
-**Files**: [`sample_plugin/settings/`](./sample_plugin/settings/)
+**Files**: [`openedx_sample_plugin/settings/`](./openedx_sample_plugin/settings/)
 
 ### Settings Structure
 
@@ -321,7 +321,7 @@ def plugin_settings(settings):
     settings.OPEN_EDX_FILTERS_CONFIG = {
         "org.openedx.learning.course.about.render.started.v1": {
             "pipeline": [
-                "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
+                "openedx_sample_plugin.pipeline.ChangeCourseAboutPageUrl"
             ],
             "fail_silently": False,
         }
@@ -368,7 +368,7 @@ tutor dev restart lms
 
 ```bash
 # In your edx-platform directory
-pip install -e /path/to/sample-plugin/backend
+pip install -e /path/to/sample-plugin/platform-plugin-sample
 
 # Run migrations
 python manage.py lms migrate
@@ -380,7 +380,7 @@ python manage.py cms migrate
 1. **Check Installation**:
    ```bash
    python manage.py lms shell
-   >>> from sample_plugin.models import CourseArchiveStatus
+   >>> from openedx_sample_plugin.models import CourseArchiveStatus
    >>> print("Plugin installed successfully!")
    ```
 
@@ -393,7 +393,7 @@ python manage.py cms migrate
 ### Running Tests
 
 ```bash
-cd backend
+cd platform-plugin-sample
 
 # Install test dependencies
 make requirements
@@ -420,7 +420,7 @@ make test-coverage
 **Model Testing Pattern:**
 ```python
 from django.test import TestCase
-from sample_plugin.models import CourseArchiveStatus
+from openedx_sample_plugin.models import CourseArchiveStatus
 
 class TestCourseArchiveStatus(TestCase):
     def test_create_archive_status(self):
@@ -449,9 +449,9 @@ class TestCourseArchiveStatusAPI(APITestCase):
 make quality
 
 # Individual tools
-pylint sample_plugin/
-isort --check-only sample_plugin/
-black --check sample_plugin/
+pylint openedx_sample_plugin/
+isort --check-only openedx_sample_plugin/
+black --check openedx_sample_plugin/
 ```
 
 ## Integration Examples
@@ -502,11 +502,11 @@ class ChangeCourseAboutPageUrl(PipelineStep):
 
 ### For Your Use Case
 
-1. **Models**: Modify [`models.py`](./sample_plugin/models.py) for your data structure
-2. **APIs**: Update [`views.py`](./sample_plugin/views.py) and [`serializers.py`](./sample_plugin/serializers.py)
-3. **Events**: Change event handlers in [`signals.py`](./sample_plugin/signals.py)
-4. **Filters**: Implement your business logic in [`pipeline.py`](./sample_plugin/pipeline.py)
-5. **Settings**: Configure plugin behavior in [`settings/`](./sample_plugin/settings/)
+1. **Models**: Modify [`models.py`](./openedx_sample_plugin/models.py) for your data structure
+2. **APIs**: Update [`views.py`](./openedx_sample_plugin/views.py) and [`serializers.py`](./openedx_sample_plugin/serializers.py)
+3. **Events**: Change event handlers in [`signals.py`](./openedx_sample_plugin/signals.py)
+4. **Filters**: Implement your business logic in [`pipeline.py`](./openedx_sample_plugin/pipeline.py)
+5. **Settings**: Configure plugin behavior in [`settings/`](./openedx_sample_plugin/settings/)
 
 ### Plugin Development Checklist
 
