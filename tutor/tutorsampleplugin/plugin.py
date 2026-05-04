@@ -1,8 +1,8 @@
 """
 Tutor plugin for the Open edX Sample Plugin.
 
-Installs the backend Django app (openedx-sample-plugin from PyPI) into LMS/CMS
-and configures the frontend MFE slot (from @openedx/sample-plugin on npm) in the
+Installs the backend Django app (platform-plugin-sample from PyPI) into LMS/CMS
+and configures the frontend MFE slot (from @openedx/plugin-sample on npm) in the
 learner-dashboard.
 
 Requirements:
@@ -22,29 +22,22 @@ except ImportError:
 # Backend: Install the Django app plugin into LMS and CMS images
 # ---------------------------------------------------------------------------
 
-# If a directory named "backend" has been moutned with `tutor mount add`, then
-# this line will ensure that the directory gets mapped into the openedx[-dev]
-# image and into the container's virtualenv. When there is no such directory
-# mounted, this line has no effect (thus it's safe for it to exist in the
-# production version of the plugin).
-hooks.Filters.MOUNTED_DIRECTORIES.add_item(("openedx", "backend"))
-
 # The openedx-dockerfile-post-python-requirements patch runs after pip
 # installs the base Open edX requirements. Plugins installed here are
 # available in both LMS and CMS containers.
 
 hooks.Filters.ENV_PATCHES.add_item((
     "openedx-dockerfile-post-python-requirements",
-    "RUN pip install openedx-sample-plugin",
+    "RUN pip install platform-plugin-sample",
 ))
 
 # ---------------------------------------------------------------------------
-# Migrations: Run sample_plugin migrations on init
+# Migrations: Run platform_plugin_sample migrations on init
 # ---------------------------------------------------------------------------
 
 hooks.Filters.CLI_DO_INIT_TASKS.add_item((
     "lms",
-    "./manage.py lms migrate sample_plugin",
+    "./manage.py lms migrate platform_plugin_sample",
 ))
 
 # ---------------------------------------------------------------------------
@@ -93,7 +86,7 @@ if _tutormfe_available:
         {
           op: PLUGIN_OPERATIONS.Insert,
           widget: {
-            id: 'sample_plugin_course_list',
+            id: 'platform_plugin_sample_course_list',
             type: DIRECT_PLUGIN,
             priority: 50,
             RenderWidget: CourseList,

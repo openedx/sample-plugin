@@ -1,11 +1,11 @@
 """
-URLs for sample_plugin.
+URLs for platform_plugin_sample.
 """
 
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from sample_plugin.views import CourseArchiveStatusViewSet
+from platform_plugin_sample.views import CourseArchiveStatusViewSet
 
 # Create a router and register our viewsets with it
 router = DefaultRouter()

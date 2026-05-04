@@ -29,7 +29,7 @@ This Tutor plugin simplifies the deployment of the sample plugin by:
 
 ## Plugin Configuration
 
-**File**: [`sample_plugin.py`](./sample_plugin.py)
+**File**: [`sample.py`](./sample.py)
 
 ### Current Configuration
 
@@ -68,7 +68,7 @@ __version__ = "1.0.0"
 
 # Backend plugin installation
 @hooks.Filters.IMAGES_BUILD_MOUNTS.add()
-def _mount_sample_plugin(mounts):
+def _mount_platform_plugin_sample(mounts):
     """Mount the sample plugin source code for development."""
     mounts.append(("sample-plugin-backend", "/openedx/sample-plugin-backend"))
     return mounts
@@ -126,14 +126,14 @@ pip install -e /path/to/sample-plugin/tutor/
 
 # Method 2: Copy plugin file (simpler for development)
 mkdir -p "$(tutor plugins printroot)"
-cp sample_plugin.py "$(tutor plugins printroot)/sample_plugin.py"
+cp sample.py "$(tutor plugins printroot)/sample.py"
 ```
 
 ### Step 2: Enable Plugin
 
 ```bash
 # Enable the plugin
-tutor plugins enable sample_plugin
+tutor plugins enable sample
 
 # Verify plugin is enabled
 tutor plugins list
@@ -161,7 +161,7 @@ tutor local launch
 
 ```bash
 # Check backend plugin
-tutor dev exec lms python manage.py shell -c "from sample_plugin.models import CourseArchiveStatus; print('Backend plugin loaded')"
+tutor dev exec lms python manage.py shell -c "from platform_plugin_sample.models import CourseArchiveStatus; print('Backend plugin loaded')"
 
 # Check frontend plugin (visit learner dashboard in browser)
 # Should see custom course list with archive functionality
@@ -202,7 +202,7 @@ tutor dev restart lms
 **Setup Pattern:**
 ```bash
 # Enable plugin
-tutor plugins enable sample_plugin
+tutor plugins enable sample
 
 # Build and deploy
 tutor local launch
@@ -236,7 +236,7 @@ def _add_backend_settings(env):
         "OPEN_EDX_FILTERS_CONFIG": {
             "org.openedx.learning.course.about.render.started.v1": {
                 "pipeline": [
-                    "sample_plugin.pipeline.ChangeCourseAboutPageUrl"
+                    "platform_plugin_sample.pipeline.ChangeCourseAboutPageUrl"
                 ],
                 "fail_silently": False,
             }
@@ -296,7 +296,7 @@ def _configure_by_environment(env):
 tutor plugins list
 
 # Check plugin syntax
-python -m py_compile sample_plugin.py
+python -m py_compile sample.py
 
 # Verify plugin location
 tutor plugins printroot
@@ -310,10 +310,10 @@ tutor images build lms
 
 # Manual installation for debugging
 tutor dev exec lms pip install -e ../sample-plugin-backend
-tutor dev exec lms python -c "import sample_plugin; print('Success')"
+tutor dev exec lms python -c "import platform_plugin_sample; print('Success')"
 
 # Check migrations
-tutor dev exec lms python manage.py showmigrations sample_plugin
+tutor dev exec lms python manage.py showmigrations platform_plugin_sample
 ```
 
 **Frontend Plugin Not Appearing:**
@@ -340,7 +340,7 @@ tutor dev exec lms python manage.py shell -c "from django.conf import settings; 
 
 ```bash
 # View plugin configuration
-tutor plugins show sample_plugin
+tutor plugins show sample
 
 # Check generated configuration
 tutor config printvalue PLUGINS
@@ -418,7 +418,7 @@ def _build_custom_image(build_config):
 def _run_plugin_migrations():
     """Run plugin migrations when platform is ready."""
     from django.core.management import call_command
-    call_command("migrate", "sample_plugin")
+    call_command("migrate", "platform_plugin_sample")
 ```
 
 ### Plugin Dependencies

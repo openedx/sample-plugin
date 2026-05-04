@@ -1,8 +1,8 @@
 """
-Production settings for the sample_plugin application.
+Production settings for the platform_plugin_sample application.
 """
 
-from sample_plugin.settings.common import plugin_settings as common_settings
+from platform_plugin_sample.settings.common import plugin_settings as common_settings
 
 
 def plugin_settings(settings):

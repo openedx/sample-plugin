@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm>8.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "openedx-sample-plugin"
+name = "platform-plugin-sample"
 description = "A sample backend plugin for the Open edX Platform"
 requires-python = ">=3.12"
 license = "Apache-2.0"
@@ -38,10 +38,10 @@ dependencies = [
 ]
 
 [project.entry-points."lms.djangoapp"]
-sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+platform_plugin_sample = "platform_plugin_sample.apps:SamplePluginConfig"
 
 [project.entry-points."cms.djangoapp"]
-sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+platform_plugin_sample = "platform_plugin_sample.apps:SamplePluginConfig"
 
 [project.urls]
 Homepage = "https://openedx.org/openedx/sample-plugin"

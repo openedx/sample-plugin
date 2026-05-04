@@ -44,7 +44,7 @@ jobs:
           git_committer_name: "github-actions"
           git_committer_email: "actions@users.noreply.github.com"
           changelog: "false"
-          directory: './backend'
+          directory: './platform-plugin-sample'
 
       - name: Publish | Upload to GitHub Release Assets
         uses: python-semantic-release/publish-action@v10.5.3
@@ -52,14 +52,14 @@ jobs:
         with:
           github_token: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
           tag: ${{ steps.release.outputs.tag }}
-          directory: './backend'
+          directory: './platform-plugin-sample'
 
       - name: Upload | Backend Distribution Artifacts
         uses: actions/upload-artifact@v4
         if: steps.release.outputs.released == 'true'
         with:
           name: backend-distribution-artifacts
-          path: backend/dist
+          path: platform-plugin-sample/dist
           if-no-files-found: error
 
       - name: Build | Tutor Plugin
@@ -102,12 +102,12 @@ jobs:
         id: artifact-download
         with:
           name: backend-distribution-artifacts
-          path: backend/dist
+          path: platform-plugin-sample/dist
 
       - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: backend/dist
+          packages-dir: platform-plugin-sample/dist
           user: __token__
           password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
 

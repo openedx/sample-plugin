@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from opaque_keys.edx.keys import CourseKey
 
-from sample_plugin.models import CourseArchiveStatus
+from platform_plugin_sample.models import CourseArchiveStatus
 
 User = get_user_model()
 

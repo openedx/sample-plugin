@@ -1,5 +1,5 @@
 """
-sample_plugin Django application initialization.
+platform_plugin_sample Django application initialization.
 """
 
 from django.apps import AppConfig
@@ -36,25 +36,25 @@ class SamplePluginConfig(AppConfig):
     This plugin is registered in pyproject.toml as::
 
         [project.entry-points."lms.djangoapp"]
-        sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+        platform_plugin_sample = "platform_plugin_sample.apps:SamplePluginConfig"
 
         [project.entry-points."cms.djangoapp"]
-        sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+        platform_plugin_sample = "platform_plugin_sample.apps:SamplePluginConfig"
 
     The platform automatically discovers and loads plugins registered in these entry points.
     """  # pylint: disable=line-too-long # noqa: E501
 
     default_auto_field = "django.db.models.BigAutoField"
-    name = "sample_plugin"
+    name = "platform_plugin_sample"
     plugin_app = {
         "url_config": {
             "lms.djangoapp": {
-                PluginURLs.NAMESPACE: "sample_plugin",
+                PluginURLs.NAMESPACE: "platform_plugin_sample",
                 PluginURLs.REGEX: r"^sample-plugin/",
                 PluginURLs.RELATIVE_PATH: "urls",
             },
             "cms.djangoapp": {
-                PluginURLs.NAMESPACE: "sample_plugin",
+                PluginURLs.NAMESPACE: "platform_plugin_sample",
                 PluginURLs.REGEX: r"^sample-plugin/",
                 PluginURLs.RELATIVE_PATH: "urls",
             },
