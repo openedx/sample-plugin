@@ -46,12 +46,9 @@ This sample plugin showcases the **Open edX Hooks Extension Framework**, which a
 ### Option 1: Development with Tutor (Recommended)
 
 ```bash
-# Backend Plugin Setup
-tutor mounts add lms:$PWD/backend:/openedx/sample-plugin-backend
-tutor dev launch
-tutor dev exec lms pip install -e ../sample-plugin-backend
-tutor dev exec lms python manage.py lms migrate
-tutor dev restart lms
+# Backend plugin setup
+tutor mounts add "$PWD/backend"
+tutor dev launch  # Rebuilds image, runs migrations, reboots containers.
 
 # Frontend Plugin Setup (for learner-dashboard MFE development)
 npm install $PWD/frontend
