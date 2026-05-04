@@ -7,6 +7,7 @@ name = "tutor-contrib-sample-plugin"
 description = "Tutor plugin for the Open edX Sample Plugin"
 requires-python = ">=3.11"
 license = "Apache-2.0"
+license-files = ["LICENSE*"]
 authors = [
     {name = "Open edX Project", email = "oscm@openedx.org"},
 ]

@@ -1,5 +1,0 @@
-include LICENSE.txt
-include README.md
-include requirements/base.in
-include requirements/constraints.txt
-recursive-include sample_plugin *.html *.png *.gif *.js *.css *.jpg *.jpeg *.svg
