@@ -1,3 +1,0 @@
-include LICENSE.txt
-include README.md
-recursive-include src/sample_plugin *.html *.png *.gif *.js *.css *.jpg *.jpeg *.svg

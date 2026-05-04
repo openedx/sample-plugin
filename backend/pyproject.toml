@@ -6,7 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "openedx-sample-plugin"
 description = "A sample backend plugin for the Open edX Platform"
 requires-python = ">=3.12"
-license="Apache-2.0"
+license = "Apache-2.0"
+license-files = ["LICENSE*"]
 authors = [
     {name = "Open edX Project", email = "oscm@openedx.org"},
 ]
@@ -91,13 +92,14 @@ dev = [
     "edx-i18n-tools",
 ]
 
+[tool.setuptools]
+include-package-data = true
+
 [tool.setuptools.dynamic]
 readme = {file = ["README.md"], content-type = "text/markdown" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["sample_plugin*"]
-exclude = ["sample_plugin.tests*"]
 
 [tool.semantic_release]
 # We use SETUPTOOLS_SCM_PRETEND_VERSION to pull the version from python-semantic-release instead
