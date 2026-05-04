@@ -1,5 +1,5 @@
 """
-Database models for sample_plugin.
+Database models for openedx_sample_plugin.
 """
 
 from django.contrib.auth import get_user_model

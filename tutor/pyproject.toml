@@ -23,7 +23,7 @@ dependencies = ["tutor>=17.0.0"]
 dynamic = ["readme", "version"]
 
 [project.entry-points."tutor.plugin.v1"]
-sample_plugin = "tutorsampleplugin.plugin"
+openedx_sample_plugin = "tutorsampleplugin.plugin"
 
 [project.urls]
 Homepage = "https://github.com/openedx/sample-plugin"

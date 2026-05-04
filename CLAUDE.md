@@ -13,7 +13,7 @@ This is a **sample plugin repository** that demonstrates all major Open edX plug
 - **Target Audience**: Developers new to Open edX plugin development
 
 **Repository Structure:**
-- `backend/` - Django app plugin with models, APIs, events, and filters
+- `platform-plugin-sample/` - Django app plugin with models, APIs, events, and filters
 - `frontend/` - React component for MFE slot customization  
 - `tutor/` - Tutor plugin for easy deployment
 - Each directory has comprehensive README.md files with TOCs
@@ -25,21 +25,21 @@ This is a **sample plugin repository** that demonstrates all major Open edX plug
 - Keep examples realistic but not overly complex
 
 **Key Files and Their Relationships:**
-- `backend/sample_plugin/apps.py` - Plugin registration and Django integration
-- `backend/sample_plugin/signals.py` - Open edX Events handlers
-- `backend/sample_plugin/pipeline.py` - Open edX Filters implementation
-- `backend/sample_plugin/models.py` - CourseArchiveStatus model (business logic)
-- `backend/sample_plugin/views.py` - REST API endpoints consumed by frontend
+- `platform-plugin-sample/openedx_sample_plugin/apps.py` - Plugin registration and Django integration
+- `platform-plugin-sample/openedx_sample_plugin/signals.py` - Open edX Events handlers
+- `platform-plugin-sample/openedx_sample_plugin/pipeline.py` - Open edX Filters implementation
+- `platform-plugin-sample/openedx_sample_plugin/models.py` - CourseArchiveStatus model (business logic)
+- `platform-plugin-sample/openedx_sample_plugin/views.py` - REST API endpoints consumed by frontend
 - `frontend/src/plugin.jsx` - React component that replaces course list slot
-- `tutor/sample_plugin.py` - Deployment configuration (currently basic template)
+- `tutor/openedx_sample_plugin.py` - Deployment configuration (currently basic template)
 
 ## Build/Lint/Test Commands
 - Make sure to set the following so that test output is not too verbose: `export PYTEST_ADDOPTS="--disable-warnings --no-header --tb=short"`
-- Backend testing: `cd backend && pytest` or `cd backend && make test`
-- Run a single test: `cd backend && pytest tests/test_models.py::test_placeholder`
-- Quality checks: `cd backend && make quality`
-- Install requirements: `cd backend && make requirements`
-- Compile requirements: `cd backend && make compile-requirements`
+- Backend testing: `cd platform-plugin-sample && pytest` or `cd platform-plugin-sample && make test`
+- Run a single test: `cd platform-plugin-sample && pytest tests/test_models.py::test_placeholder`
+- Quality checks: `cd platform-plugin-sample && make quality`
+- Install requirements: `cd platform-plugin-sample && make requirements`
+- Compile requirements: `cd platform-plugin-sample && make compile-requirements`
 
 ## Code Style Guidelines
 - Python: Follow PEP 8 with max line length of 120

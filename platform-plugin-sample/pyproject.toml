@@ -38,10 +38,10 @@ dependencies = [
 ]
 
 [project.entry-points."lms.djangoapp"]
-sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+openedx_sample_plugin = "openedx_sample_plugin.apps:SamplePluginConfig"
 
 [project.entry-points."cms.djangoapp"]
-sample_plugin = "sample_plugin.apps:SamplePluginConfig"
+openedx_sample_plugin = "openedx_sample_plugin.apps:SamplePluginConfig"
 
 [project.urls]
 Homepage = "https://openedx.org/openedx/sample-plugin"

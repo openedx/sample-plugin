@@ -305,7 +305,7 @@ if (response.data && Array.isArray(response.data)) {
 ### Prerequisites
 
 1. **MFE Setup**: Have a learner dashboard MFE running locally
-2. **Backend Plugin**: Install the backend plugin (see [`../backend/README.md`](../backend/README.md))
+2. **Backend Plugin**: Install the backend plugin (see [`../platform-plugin-sample/README.md`](../platform-plugin-sample/README.md))
 3. **Node.js**: Version 16+ with npm or yarn
 
 ### Local Development Setup

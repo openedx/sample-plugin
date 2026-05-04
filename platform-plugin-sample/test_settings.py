@@ -54,7 +54,7 @@ plugin_apps = get_plugin_apps(PLUGIN_CONTEXTS[0])
 INSTALLED_APPS.extend(plugin_apps)
 
 LOCALE_PATHS = [
-    root("sample_plugin", "conf", "locale"),
+    root("openedx_sample_plugin", "conf", "locale"),
 ]
 
 ROOT_URLCONF = "tests.urls"
