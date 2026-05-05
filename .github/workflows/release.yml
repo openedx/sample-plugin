@@ -69,14 +69,14 @@ jobs:
         # setuptools-scm picks it up at build time.
         if: steps.release.outputs.released == 'true'
         run: pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.release.outputs.version }} python -m build
-        working-directory: './tutor'
+        working-directory: './tutor-contrib-sample'
 
       - name: Upload | Tutor Plugin Distribution Artifacts
         uses: actions/upload-artifact@v4
         if: steps.release.outputs.released == 'true'
         with:
           name: tutor-distribution-artifacts
-          path: tutor/dist
+          path: tutor-contrib-sample/dist
           if-no-files-found: error
 
     outputs:
@@ -125,12 +125,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tutor-distribution-artifacts
-          path: tutor/dist
+          path: tutor-contrib-sample/dist
 
       - name: Publish to PyPi
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          packages-dir: tutor/dist
+          packages-dir: tutor-contrib-sample/dist
           user: __token__
           password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
 

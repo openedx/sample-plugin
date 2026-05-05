@@ -3,7 +3,7 @@ requires = ["setuptools", "setuptools-scm>8.1"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "tutor-contrib-sample-plugin"
+name = "tutor-contrib-sample"
 description = "Tutor plugin for the Open edX Sample Plugin"
 requires-python = ">=3.11"
 license = "Apache-2.0"
@@ -23,7 +23,7 @@ dependencies = ["tutor>=17.0.0"]
 dynamic = ["readme", "version"]
 
 [project.entry-points."tutor.plugin.v1"]
-openedx_sample_plugin = "tutorsampleplugin.plugin"
+sample = "tutorsample.plugin"
 
 [project.urls]
 Homepage = "https://github.com/openedx/sample-plugin"
@@ -34,7 +34,7 @@ readme = {file = ["README.md"], content-type = "text/markdown"}
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["tutorsampleplugin*"]
+include = ["tutorsample*"]
 
 [tool.setuptools_scm]
 # The root for the git repo is one directory up.

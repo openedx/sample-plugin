@@ -15,7 +15,7 @@ This is a **sample plugin repository** that demonstrates all major Open edX plug
 **Repository Structure:**
 - `platform-plugin-sample/` - Django app plugin with models, APIs, events, and filters
 - `frontend-plugin-sample/` - React component for MFE slot customization  
-- `tutor/` - Tutor plugin for easy deployment
+- `tutor-contrib-sample/` - Tutor plugin for easy deployment
 - Each directory has comprehensive README.md files with TOCs
 
 **When Making Changes:**

@@ -420,7 +420,7 @@ Test within the actual MFE environment:
 
 ### Production Deployment with Tutor
 
-**Tutor Plugin Configuration** (see [`../tutor/README.md`](../tutor/README.md)):
+**Tutor Plugin Configuration** (see [`../tutor-contrib-sample/README.md`](../tutor-contrib-sample/README.md)):
 
 ```python
 # In tutor plugin

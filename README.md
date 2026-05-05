@@ -39,7 +39,6 @@ This sample plugin showcases the **Open edX Hooks Extension Framework**, which a
 ## Quick Start Guide
 
 ### Prerequisites
-
 1. **Platform Setup**: Follow the [Open edX Development Setup](https://docs.openedx.org/en/latest/developers/how-tos/get-ready-for-python-dev.html)
 2. **Understanding**: Read the [Platform Overview](https://docs.openedx.org/en/latest/developers/concepts/platform_overview.html)
 
@@ -135,7 +134,7 @@ sample-plugin/
 │   │   ├── plugin.jsx                 # React component for MFE slot
 │   │   └── index.jsx                  # Export configuration
 │   └── package.json                   # NPM package configuration
-└── tutor/
+└── tutor-contrib-sample/
     ├── README.md                      # Tutor deployment guide
     └── sample.py               # Tutor plugin configuration
 ```

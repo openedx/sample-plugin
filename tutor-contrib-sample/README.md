@@ -122,7 +122,7 @@ PLUGIN_SLOTS.add_items([
 
 ```bash
 # Method 1: Install from local directory
-pip install -e /path/to/sample-plugin/tutor/
+pip install -e /path/to/sample-plugin/tutor-contrib-sample/
 
 # Method 2: Copy plugin file (simpler for development)
 mkdir -p "$(tutor plugins printroot)"
