@@ -151,7 +151,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version-file: './frontend/.nvmrc'
+          node-version-file: './frontend-plugin-sample/.nvmrc'
 
       - name: Update the package version and publish
         run: |
@@ -159,4 +159,4 @@ jobs:
           npm version ${{ needs.release.outputs.version }}
           npm run build
           npm publish
-        working-directory: './frontend'
+        working-directory: './frontend-plugin-sample'

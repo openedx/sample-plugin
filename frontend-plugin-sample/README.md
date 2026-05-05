@@ -195,7 +195,7 @@ const handleArchiveToggle = async (courseId, isCurrentlyArchived) => {
 
 ```javascript
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
-import { CourseList } from '@openedx/sample-plugin';
+import { CourseList } from '@openedx/plugin-sample';
 
 const config = {
   pluginSlots: {
@@ -314,7 +314,7 @@ if (response.data && Array.isArray(response.data)) {
 
 ```bash
 # In your MFE directory (e.g., frontend-app-learner-dashboard)
-npm install /path/to/sample-plugin/frontend
+npm install /path/to/sample-plugin/frontend-plugin-sample
 ```
 
 #### Step 2: Create env.config.jsx
@@ -323,7 +323,7 @@ Create `env.config.jsx` in your MFE root (not committed to repo):
 
 ```javascript
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
-import { CourseList } from '@openedx/sample-plugin';
+import { CourseList } from '@openedx/plugin-sample';
 
 const config = {
   pluginSlots: {
@@ -355,8 +355,8 @@ Create `module.config.js` for local development:
 module.exports = {
   localModules: [
     {
-      moduleName: '@openedx/sample-plugin',
-      dir: '/path/to/sample-plugin/frontend'
+      moduleName: '@openedx/plugin-sample',
+      dir: '/path/to/sample-plugin/frontend-plugin-sample'
     },
   ],
 };
@@ -547,7 +547,7 @@ const CourseList = ({ courseListData }) => (
 
 **Plugin Not Loading**:
 - Check `env.config.jsx` slot name matches target slot
-- Verify plugin is installed (`npm list @openedx/sample-plugin`)
+- Verify plugin is installed (`npm list @openedx/plugin-sample`)
 - Ensure MFE supports the plugin framework version
 - Check browser console for JavaScript errors
 

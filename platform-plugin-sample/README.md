@@ -464,7 +464,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     # Provides data for frontend consumption
 ```
 
-**Frontend Consumption** (see [`../frontend/src/plugin.jsx`](../frontend/src/plugin.jsx)):
+**Frontend Consumption** (see [`../frontend-plugin-sample/src/plugin.jsx`](../frontend-plugin-sample/src/plugin.jsx)):
 ```javascript
 const response = await client.get(
   `${lmsBaseUrl}/sample-plugin/api/v1/course-archive-status/`

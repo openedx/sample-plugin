@@ -56,7 +56,7 @@ if _tutormfe_available:
     # The plugin slot config is still scoped to learner-dashboard at runtime.
     hooks.Filters.ENV_PATCHES.add_item((
         "mfe-dockerfile-post-npm-install",
-        "RUN npm install @openedx/sample-plugin",
+        "RUN npm install @openedx/plugin-sample",
     ))
 
     # Step 2: Import the CourseList component in the MFE env config so it is
@@ -65,7 +65,7 @@ if _tutormfe_available:
     # into the generated env.config.jsx file.
     hooks.Filters.ENV_PATCHES.add_item((
         "mfe-env-config-buildtime-imports",
-        "import { CourseList } from '@openedx/sample-plugin';",
+        "import { CourseList } from '@openedx/plugin-sample';",
     ))
 
     # Step 3: Configure the course list plugin slot.

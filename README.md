@@ -55,8 +55,8 @@ tutor mounts add "$PWD/platform-plugin-sample"
 tutor dev launch  
 
 # Frontend Plugin Setup (for learner-dashboard MFE development)
-npm install $PWD/frontend
-# Add env.config.jsx and module.config.js (see frontend/README.md)
+npm install $PWD/frontend-plugin-sample
+# Add env.config.jsx and module.config.js (see frontend-plugin-sample/README.md)
 npm start
 ```
 
@@ -95,6 +95,7 @@ Use the table above to identify which type of plugin matches your needs. You can
 - **Backend**: Start with [`platform-plugin-sample/openedx_sample_plugin/apps.py`](./platform-plugin-sample/openedx_sample_plugin/apps.py) to understand plugin registration
 - **Events**: Examine [`platform-plugin-sample/openedx_sample_plugin/signals.py`](./platform-plugin-sample/openedx_sample_plugin/signals.py) for event handling patterns
 - **Filters**: Review [`platform-plugin-sample/openedx_sample_plugin/pipeline.py`](./platform-plugin-sample/openedx_sample_plugin/pipeline.py) for behavior modification
+<<<<<<< HEAD
 - **Frontend**: Explore [`frontend/src/plugin.jsx`](./frontend/src/plugin.jsx) for UI customization
 =======
 - **Backend**: Start with [`platform-plugin-sample/platform_plugin_sample/apps.py`](./platform-plugin-sample/platform_plugin_sample/apps.py) to understand plugin registration
@@ -102,6 +103,9 @@ Use the table above to identify which type of plugin matches your needs. You can
 - **Filters**: Review [`platform-plugin-sample/platform_plugin_sample/pipeline.py`](./platform-plugin-sample/platform_plugin_sample/pipeline.py) for behavior modification
 - **Frontend**: Explore [`frontend-plugin-sample/src/plugin.jsx`](./frontend-plugin-sample/src/plugin.jsx) for UI customization
 >>>>>>> dcbc708 (backend pkg name)
+=======
+- **Frontend**: Explore [`frontend-plugin-sample/src/plugin.jsx`](./frontend-plugin-sample/src/plugin.jsx) for UI customization
+>>>>>>> 9f7efff (feat!: Rename frontend -> frontend-plugin-sample)
 
 ### 4. Run This Sample
 Follow the [Quick Start Guide](#quick-start-guide) to see everything working together.
@@ -125,7 +129,7 @@ sample-plugin/
 │   │   ├── settings/                  # Plugin settings configuration
 │   │   └── urls.py                    # URL routing
 │   └── tests/                         # Comprehensive test examples
-├── frontend/
+├── frontend-plugin-sample/
 │   ├── README.md                      # Frontend plugin detailed guide
 │   ├── src/
 │   │   ├── plugin.jsx                 # React component for MFE slot
@@ -155,11 +159,11 @@ sample-plugin/
 
 1. **Setup**: Follow frontend setup in [Quick Start](#quick-start-guide)
 2. **Development**:
-   - Modify React components in `frontend/src/`
+   - Modify React components in `frontend-plugin-sample/src/`
    - Test with local MFE development server
 3. **Testing**: Integration testing with MFE
 
-**Detailed Guide**: See [`frontend/README.md`](./frontend/README.md)
+**Detailed Guide**: See [`frontend-plugin-sample/README.md`](./frontend-plugin-sample/README.md)
 
 ### Full-Stack Plugin Development
 
@@ -181,7 +185,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
 ```
 
 ```jsx
-// frontend/src/plugin.jsx - Consumes API
+// frontend-plugin-sample/src/plugin.jsx - Consumes API
 const response = await client.get(
   `${lmsBaseUrl}/sample-plugin/api/v1/course-archive-status/`
 );

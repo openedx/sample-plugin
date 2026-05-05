@@ -1,5 +1,5 @@
 {
-  "name": "@openedx/sample-plugin",
+  "name": "@openedx/plugin-sample",
   "version": "__semantically__released__",
   "main": "dist/index.js",
   "files": ["dist"],

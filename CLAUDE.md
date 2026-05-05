@@ -14,7 +14,7 @@ This is a **sample plugin repository** that demonstrates all major Open edX plug
 
 **Repository Structure:**
 - `platform-plugin-sample/` - Django app plugin with models, APIs, events, and filters
-- `frontend/` - React component for MFE slot customization  
+- `frontend-plugin-sample/` - React component for MFE slot customization  
 - `tutor/` - Tutor plugin for easy deployment
 - Each directory has comprehensive README.md files with TOCs
 
@@ -61,7 +61,7 @@ Always run `make quality` and fix issues before creating a PR to ensure consiste
 - **Realistic Complexity**: Keep examples practical but not overly complex
 
 ### Code Relationships to Preserve
-- **Backend ↔ Frontend**: CourseArchiveStatus API in `views.py` consumed by `frontend/src/plugin.jsx`
+- **Backend ↔ Frontend**: CourseArchiveStatus API in `views.py` consumed by `frontend-plugin-sample/src/plugin.jsx`
 - **Events ↔ Models**: Signal handlers in `signals.py` can update models in `models.py`
 - **Settings ↔ Filters**: Filter registration in `settings/common.py` must match classes in `pipeline.py`
 - **Apps.py ↔ All**: Plugin configuration affects URL routing, settings, and signal registration
