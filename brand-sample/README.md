@@ -16,7 +16,7 @@
 > * **Open edX "Teak" release or later (Tutor >= 20)**
 > * **Tutor >= 20**
 
-### Configure `tutor` to use this theme
+## TODO
 
 #### Using the [`jsdelivr`](https://www.jsdelivr.com/) CDN (Recommended)
 

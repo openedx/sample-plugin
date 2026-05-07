@@ -9,6 +9,7 @@ Requirements:
     tutor>=17.0.0
     tutor-mfe (for frontend slot configuration)
 """
+import json
 
 from tutor import hooks
 
@@ -93,3 +94,35 @@ if _tutormfe_available:
           },
         }""",
     ))
+
+# ---------------------------------------------------------------------------
+# Brand
+# ---------------------------------------------------------------------------
+# TODO: This assumes brand-sample has been pushed to jsdeliver.
+#       Is it possible to set this up for dev so that it loads the brand from
+#       the filesystem instead?
+#       ANSWER: Yes, it is possible using the tutor-contrib-paragon plugin.
+#       We should update this section to use that.
+# ---------------------------------------------------------------------------
+
+paragon_theme_urls = {
+    "variants": {
+        "light": {
+            "urls": {
+                "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css",
+                "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css"
+            }
+        }
+    }
+}
+
+settings_lines = f"""
+MFE_CONFIG["PARAGON_THEME_URLS"] = {json.dumps(paragon_theme_urls)}
+"""
+
+hooks.Filters.ENV_PATCHES.add_item(
+    (
+        "mfe-lms-common-settings",
+        settings_lines,
+    )
+)
