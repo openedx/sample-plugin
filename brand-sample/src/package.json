@@ -1,18 +1,18 @@
 {
-  "name": "brand-example-purple",
+  "name": "brand-sample",
   "version": "0.0.1",
   "description": "An example design-token-based brand package for Open edX applications.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/openedx/sample-plugin.git",
-    "directory": "brand"
+    "directory": "brand-sample"
   },
   "author": "Brian Smith",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/openedx/sample-plugin/issues"
   },
-  "homepage": "https://github.com/openedx/sample-plugin/tree/main/brand#readme",
+  "homepage": "https://github.com/openedx/sample-plugin/tree/main/brand-sample#readme",
   "scripts": {
     "build-tokens": "paragon build-tokens --source ./tokens/src --build-dir ./paragon/css --source-tokens-only --exclude-core",
     "build-scss": "paragon build-scss --themesPath ./paragon/css/themes --defaultThemeVariants light --excludeCore",

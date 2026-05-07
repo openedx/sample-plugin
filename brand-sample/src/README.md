@@ -1,4 +1,4 @@
-# brand-example-purple
+# brand-sample
 
 This directory contains the source design tokens for the example brand package.
 

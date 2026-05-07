@@ -1,4 +1,4 @@
-# brand-example-purple
+# brand-sample
 
 **This is a simple example brand package that changes the `brand` color to purple.**
 
@@ -22,7 +22,7 @@
 
 1. Stop `tutor` (`tutor dev stop` or `tutor local stop`)
 2. Navigate to your local tutor plugins directory (`tutor plugins printroot`)
-3. Create a new `purple-jsdelivr.py` plugin file with the following content
+3. Create a new `sample-jsdelivr.py` plugin file with the following content
 
 ```py
 import json
@@ -33,7 +33,7 @@ paragon_theme_urls = {
         "light": {
             "urls": {
                 "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css",
-                "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand/dist/light.min.css"
+                "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css"
             }
         }
     }
@@ -51,7 +51,7 @@ hooks.Filters.ENV_PATCHES.add_item(
 )
 ```
 
-4. Enable the plugin (`tutor plugins enable purple-jsdelivr`)
+4. Enable the plugin (`tutor plugins enable sample-jsdelivr`)
 5. Start `tutor`  (`tutor dev start lms cms mfe` or `tutor local start lms cms mfe`)
 
 #### Using the [Tutor Paragon Plugin](https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon) (Recommended)
