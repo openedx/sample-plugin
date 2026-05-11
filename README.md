@@ -90,21 +90,10 @@ python manage.py lms migrate
 Use the table above to identify which type of plugin matches your needs. You can combine multiple types in one plugin.
 
 ### 3. Study the Sample Code
-<<<<<<< HEAD
-- **Backend**: Start with [`platform-plugin-sample/openedx_sample_plugin/apps.py`](./platform-plugin-sample/openedx_sample_plugin/apps.py) to understand plugin registration
-- **Events**: Examine [`platform-plugin-sample/openedx_sample_plugin/signals.py`](./platform-plugin-sample/openedx_sample_plugin/signals.py) for event handling patterns
-- **Filters**: Review [`platform-plugin-sample/openedx_sample_plugin/pipeline.py`](./platform-plugin-sample/openedx_sample_plugin/pipeline.py) for behavior modification
-<<<<<<< HEAD
-- **Frontend**: Explore [`frontend/src/plugin.jsx`](./frontend/src/plugin.jsx) for UI customization
-=======
 - **Backend**: Start with [`platform-plugin-sample/platform_plugin_sample/apps.py`](./platform-plugin-sample/platform_plugin_sample/apps.py) to understand plugin registration
 - **Events**: Examine [`platform-plugin-sample/platform_plugin_sample/signals.py`](./platform-plugin-sample/platform_plugin_sample/signals.py) for event handling patterns
 - **Filters**: Review [`platform-plugin-sample/platform_plugin_sample/pipeline.py`](./platform-plugin-sample/platform_plugin_sample/pipeline.py) for behavior modification
 - **Frontend**: Explore [`frontend-plugin-sample/src/plugin.jsx`](./frontend-plugin-sample/src/plugin.jsx) for UI customization
->>>>>>> dcbc708 (backend pkg name)
-=======
-- **Frontend**: Explore [`frontend-plugin-sample/src/plugin.jsx`](./frontend-plugin-sample/src/plugin.jsx) for UI customization
->>>>>>> 9f7efff (feat!: Rename frontend -> frontend-plugin-sample)
 
 ### 4. Run This Sample
 Follow the [Quick Start Guide](#quick-start-guide) to see everything working together.
