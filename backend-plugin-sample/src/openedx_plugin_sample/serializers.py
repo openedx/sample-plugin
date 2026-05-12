@@ -1,11 +1,11 @@
 """
-Serializers for the platform_plugin_sample app.
+Serializers for the openedx_plugin_sample app.
 """
 
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from platform_plugin_sample.models import CourseArchiveStatus
+from openedx_plugin_sample.models import CourseArchiveStatus
 
 User = get_user_model()
 

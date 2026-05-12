@@ -68,7 +68,7 @@ __version__ = "1.0.0"
 
 # Backend plugin installation
 @hooks.Filters.IMAGES_BUILD_MOUNTS.add()
-def _mount_platform_plugin_sample(mounts):
+def _mount_openedx_plugin_sample(mounts):
     """Mount the sample plugin source code for development."""
     mounts.append(("sample-plugin-backend", "/openedx/sample-plugin-backend"))
     return mounts
@@ -161,7 +161,7 @@ tutor local launch
 
 ```bash
 # Check backend plugin
-tutor dev exec lms python manage.py shell -c "from platform_plugin_sample.models import CourseArchiveStatus; print('Backend plugin loaded')"
+tutor dev exec lms python manage.py shell -c "from openedx_plugin_sample.models import CourseArchiveStatus; print('Backend plugin loaded')"
 
 # Check frontend plugin (visit learner dashboard in browser)
 # Should see custom course list with archive functionality
@@ -236,7 +236,7 @@ def _add_backend_settings(env):
         "OPEN_EDX_FILTERS_CONFIG": {
             "org.openedx.learning.course.about.render.started.v1": {
                 "pipeline": [
-                    "platform_plugin_sample.pipeline.ChangeCourseAboutPageUrl"
+                    "openedx_plugin_sample.pipeline.ChangeCourseAboutPageUrl"
                 ],
                 "fail_silently": False,
             }
@@ -310,10 +310,10 @@ tutor images build lms
 
 # Manual installation for debugging
 tutor dev exec lms pip install -e ../sample-plugin-backend
-tutor dev exec lms python -c "import platform_plugin_sample; print('Success')"
+tutor dev exec lms python -c "import openedx_plugin_sample; print('Success')"
 
 # Check migrations
-tutor dev exec lms python manage.py showmigrations platform_plugin_sample
+tutor dev exec lms python manage.py showmigrations openedx_plugin_sample
 ```
 
 **Frontend Plugin Not Appearing:**
@@ -418,7 +418,7 @@ def _build_custom_image(build_config):
 def _run_plugin_migrations():
     """Run plugin migrations when platform is ready."""
     from django.core.management import call_command
-    call_command("migrate", "platform_plugin_sample")
+    call_command("migrate", "openedx_plugin_sample")
 ```
 
 ### Plugin Dependencies

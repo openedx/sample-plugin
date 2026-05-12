@@ -15,8 +15,8 @@ def test_app_is_installed():
     INSTALLED_APPS
 
     """
-    assert "platform_plugin_sample.apps.SamplePluginConfig" in settings.INSTALLED_APPS
-    assert apps.get_app_config("platform_plugin_sample") is not None
+    assert "openedx_plugin_sample.apps.SamplePluginConfig" in settings.INSTALLED_APPS
+    assert apps.get_app_config("openedx_plugin_sample") is not None
 
 
 # We don't do a test for the URLs because the namespaced urls which should be auto registered are tested in the

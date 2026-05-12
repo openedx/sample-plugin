@@ -1,7 +1,7 @@
 """
 Tutor plugin for the Open edX Sample Plugin.
 
-Installs the backend Django app (platform-plugin-sample from PyPI) into LMS/CMS
+Installs the backend Django app (openedx-plugin-sample from PyPI) into LMS/CMS
 and configures the frontend MFE slot (from @openedx/plugin-sample on npm) in the
 learner-dashboard.
 
@@ -30,16 +30,22 @@ except ImportError:
 # @@TODO: reinstate once published
 #hooks.Filters.ENV_PATCHES.add_item((
 #    "openedx-dockerfile-post-python-requirements",
-#    "RUN pip install platform-plugin-sample",
+#    "RUN pip install openedx-plugin-sample",
 #))
 
+# Ensure that *if* backend-plugin-sample is bind-mounted, then it is mapped
+# to /mnt/backend-plugin-sample and pip-installed as part of the openedx
+# and openedx-dev image builds
+
+hooks.Filters.MOUNTED_DIRECTORIES.add_item(("openedx", "backend-plugin-sample"))
+
 # ---------------------------------------------------------------------------
-# Migrations: Run platform_plugin_sample migrations on init
+# Migrations: Run openedx_plugin_sample migrations on init
 # ---------------------------------------------------------------------------
 
 hooks.Filters.CLI_DO_INIT_TASKS.add_item((
     "lms",
-    "./manage.py lms migrate platform_plugin_sample",
+    "./manage.py lms migrate openedx_plugin_sample",
 ))
 
 # ---------------------------------------------------------------------------
@@ -88,7 +94,7 @@ if _tutormfe_available:
         {
           op: PLUGIN_OPERATIONS.Insert,
           widget: {
-            id: 'platform_plugin_sample_course_list',
+            id: 'openedx_plugin_sample_course_list',
             type: DIRECT_PLUGIN,
             priority: 50,
             RenderWidget: CourseList,

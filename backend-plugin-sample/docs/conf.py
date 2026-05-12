@@ -1,6 +1,6 @@
 # pylint: disable=invalid-name
 """
-platform_plugin_sample documentation build configuration file.
+openedx_plugin_sample documentation build configuration file.
 
 This file is execfile()d with the current directory set to its
 containing dir.
@@ -24,7 +24,7 @@ from importlib.metadata import version as get_version
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(REPO_ROOT)
 
-VERSION = get_version('platform-plugin-sample')
+VERSION = get_version('openedx-plugin-sample')
 # Configure Django for autodoc usage
 os.environ['DJANGO_SETTINGS_MODULE'] = 'test_settings'
 django_setup()
@@ -76,10 +76,10 @@ source_suffix = '.rst'
 top_level_doc = 'index'
 
 # General information about the project.
-project = 'platform_plugin_sample'
+project = 'openedx_plugin_sample'
 copyright = f'{datetime.now().year}, Axim Collaborative, Inc.'  # pylint: disable=redefined-builtin
 author = 'Axim Collaborative, Inc.'
-project_title = 'platform_plugin_sample'
+project_title = 'openedx_plugin_sample'
 documentation_title = f"{project_title}"
 
 # Set display_github to False if you don't want "edit on Github" button
@@ -208,7 +208,7 @@ html_theme_options = {
 # The name for this set of Sphinx documents.
 # "<project> v<release> documentation" by default.
 #
-# html_title = 'platform_plugin_sample v0.1.0'
+# html_title = 'openedx_plugin_sample v0.1.0'
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #
@@ -522,8 +522,8 @@ def on_init(app):  # pylint: disable=unused-argument
         # If we are, assemble the path manually
         bin_path = os.path.abspath(os.path.join(sys.prefix, 'bin'))
         apidoc_path = os.path.join(bin_path, apidoc_path)
-    check_call([apidoc_path, '-o', docs_path, os.path.join(root_path, 'src/platform_plugin_sample'),
-                os.path.join(root_path, 'src/platform_plugin_sample/migrations')])
+    check_call([apidoc_path, '-o', docs_path, os.path.join(root_path, 'src/openedx_plugin_sample'),
+                os.path.join(root_path, 'src/openedx_plugin_sample/migrations')])
 
 
 def setup(app):
