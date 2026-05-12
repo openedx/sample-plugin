@@ -73,3 +73,40 @@ $ tree ~/.local/share/tutor-main/env/plugins/paragon
 ```
 6. [Build](https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon#build-all-themes) the theme
 7. Start `tutor`  (`tutor dev start lms cms mfe` or `tutor local start lms cms mfe`)
+
+### ***OR*** manually add to an MFE's `env.config.js(x)`
+Minimal `env.config.js` to install this theme
+
+```js
+const config = {
+  PARAGON_THEME_URLS: {
+    variants: {
+      light: {
+        urls: {
+          "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css",
+          "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand/dist/light.min.css"
+        },
+      },
+    },
+  },
+};
+
+export default config;
+```
+
+### ***OR*** manually add to a `frontend-base` site's `site.config.tsx`
+Add the following block to your `SiteConfig` object in `site.config.tsx`
+
+```tsx
+const siteConfig: SiteConfig = {
+  [...]
+  theme: {
+    variants: {
+      light: {
+        url: 'https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand/dist/light.min.css
+      },
+    },
+  },
+  [...]
+}
+```
