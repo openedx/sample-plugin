@@ -27,11 +27,10 @@ except ImportError:
 # installs the base Open edX requirements. Plugins installed here are
 # available in both LMS and CMS containers.
 
-# @@TODO: reinstate once published
-#hooks.Filters.ENV_PATCHES.add_item((
-#    "openedx-dockerfile-post-python-requirements",
-#    "RUN pip install openedx-plugin-sample",
-#))
+hooks.Filters.ENV_PATCHES.add_item((
+    "openedx-dockerfile-post-python-requirements",
+    "RUN pip install openedx-plugin-sample",
+))
 
 # Ensure that *if* backend-plugin-sample is bind-mounted, then it is mapped
 # to /mnt/backend-plugin-sample and pip-installed as part of the openedx
