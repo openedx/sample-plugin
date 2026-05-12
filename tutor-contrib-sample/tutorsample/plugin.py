@@ -127,13 +127,13 @@ paragon_theme_urls = {
     }
 }
 
-settings_lines = f"""
+brand_settings_lines = f"""
 MFE_CONFIG["PARAGON_THEME_URLS"] = {json.dumps(paragon_theme_urls)}
 """
 
 hooks.Filters.ENV_PATCHES.add_item(
     (
         "mfe-lms-common-settings",
-        settings_lines,
+        brand_settings_lines,
     )
 )
