@@ -310,6 +310,13 @@ if (response.data && Array.isArray(response.data)) {
 
 ### Local Development Setup
 
+#### Step 0: Build Plugin
+
+```bash
+cd /path/to/sample-plugin/frontend-plugin-sample
+npm run build
+```
+
 #### Step 1: Install Plugin Package
 
 ```bash
