@@ -47,6 +47,10 @@ hooks.Filters.CLI_DO_INIT_TASKS.add_item((
     "lms",
     "./manage.py lms migrate openedx_plugin_sample",
 ))
+hooks.Filters.CLI_DO_INIT_TASKS.add_item((
+    "cms",
+    "./manage.py cms migrate openedx_plugin_sample",
+))
 
 # ---------------------------------------------------------------------------
 # Frontend: Install npm package and configure the learner-dashboard slot
