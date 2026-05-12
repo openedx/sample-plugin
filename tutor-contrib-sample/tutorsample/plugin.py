@@ -107,9 +107,15 @@ if _tutormfe_available:
     ))
 
 # ---------------------------------------------------------------------------
-# Brand
+# Brand: Override Paragon theme CSS with brand-sample
 # ---------------------------------------------------------------------------
-# TODO: This assumes brand-sample has been pushed to jsdeliver.
+# Open edX MFEs load their Paragon design-system CSS at runtime via the
+# PARAGON_THEME_URLS setting. The "default" URL points at upstream Paragon;
+# the optional "brandOverride" URL is loaded on top to recolor/restyle the
+# theme. We point brandOverride at the compiled CSS in this repo's
+# brand-sample/ directory, served via jsDelivr straight from GitHub.
+#
+# TODO: This assumes brand-sample has been pushed to jsdelivr.
 #       Is it possible to set this up for dev so that it loads the brand from
 #       the filesystem instead?
 #       ANSWER: Yes, it is possible using the tutor-contrib-paragon plugin.
