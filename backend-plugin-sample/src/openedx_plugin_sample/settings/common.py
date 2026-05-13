@@ -11,7 +11,8 @@ the main settings object. You can modify this object to add plugin-specific
 configuration that integrates seamlessly with the platform.
 
 Official Documentation:
-- Plugin Settings: https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#plugin-settings
+- Plugin Settings:
+  https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html#plugin-settings
 - Django Settings: https://docs.djangoproject.com/en/stable/topics/settings/
 
 Settings Organization:
@@ -96,8 +97,8 @@ def _configure_openedx_filters(settings):
     filters_config = getattr(settings, 'OPEN_EDX_FILTERS_CONFIG', {})
 
     # Filter we want to register
-    filter_name = "org.openedx.learning.course_about.page.url.requested.v1"
-    our_pipeline_step = "openedx_plugin_sample.pipeline.ChangeCourseAboutPageUrl"
+    filter_name = "org.openedx.learning.home.courserun.api.rendered.started.v1"
+    our_pipeline_step = "openedx_plugin_sample.pipeline.AddArchiveStatusToLearnerHomeCourseRun"
 
     # Check if this filter already has configuration
     if filter_name in filters_config:

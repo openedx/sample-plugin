@@ -38,119 +38,53 @@ Common Use Cases:
 """  # pylint: disable=line-too-long
 
 import logging
-import re
 
+import crum
 from openedx_filters.filters import PipelineStep
+
+from .models import CourseArchiveStatus
 
 logger = logging.getLogger(__name__)
 
 
-class ChangeCourseAboutPageUrl(PipelineStep):
+class AddArchiveStatusToLearnerHomeCourseRun(PipelineStep):
     """
-    Filter to customize course about page URLs.
-
-    This filter demonstrates how to intercept and modify course about page URLs,
-    redirecting them to external sites or custom implementations.
-
-    Filter Hook Point:
-    This filter hooks into the course about page URL rendering process.
-    Register it for the filter: org.openedx.learning.course.about.render.started.v1
-
-    Registration Example (in settings/common.py)::
-
-        def plugin_settings(settings):
-            settings.OPEN_EDX_FILTERS_CONFIG = {
-                "org.openedx.learning.course.about.render.started.v1": {
-                    "pipeline": [
-                        "openedx_plugin_sample.pipeline.ChangeCourseAboutPageUrl"
-                    ],
-                    "fail_silently": False,
-                }
-            }
-
-    Filter Documentation:
-    - Available Filters: https://docs.openedx.org/projects/openedx-filters/en/latest/reference/filters.html
-    - PipelineStep: https://docs.openedx.org/projects/openedx-filters/en/latest/reference/filters-tooling.html#openedx_filters.filters.PipelineStep
-
-    Real-World Use Cases:
-    - Redirect to marketing site course pages
-    - Implement custom course discovery interfaces
-    - Add tracking parameters to URLs
-    - Route different course types to different platforms
-    - Implement A/B testing for course pages
+    Customize each courseRun within a Learner Dashboard's /init API response to include the CourseArchiveStatus.
     """  # noqa: E501
 
-    def run_filter(self, url, org, **kwargs):  # pylint: disable=arguments-differ
+    def run_filter(self, serialized_courserun, **kwargs):  # pylint: disable=arguments-differ
         """
-        Modify the course about page URL.
-
-        This method intercepts course about page URL generation and can modify
-        the destination URL based on business logic.
+        Insert `isArchivedByLearner` into one serialized courseRun for the Learner Home /init response.
 
         Args:
-            url (str): The original course about page URL
-            org (str): The organization/institution identifier
-            **kwargs: Additional context data from the platform
+            serialized_courserun (dict): One courseRun from the serializer. Reads
+                `courseId` (a course key string, e.g. "course-v1:edX+DemoX+Demo_Course");
+                all other fields are passed through unchanged.
 
         Returns:
-            dict: Dictionary with same parameter names as input
-                - url (str): Modified or original URL
-                - org (str): Organization identifier (usually unchanged)
+            dict: ``{"serialized_courserun": <updated dict>}``. The updated dict has the
+                same keys as the input plus `isArchivedByLearner` (bool) -- True iff a
+                CourseArchiveStatus row exists for the current request user and this
+                courseId with `is_archived=True`; False otherwise (including when no row
+                exists).
 
-        Raises:
-            FilterException: If processing should be halted
-
-        Filter Requirements:
-        - Must return dictionary with keys matching input parameters
-        - Return None to skip this filter (let other filters run)
-        - Raise FilterException to halt pipeline execution
-        - Handle all input scenarios gracefully
-
-        URL Pattern Matching:
-        This implementation looks for Open edX course keys in the format:
-        course-v1:ORG+COURSE+RUN (e.g., course-v1:edX+DemoX+Demo_Course)
-
-        Documentation:
-        - run_filter method: https://docs.openedx.org/projects/openedx-filters/en/latest/reference/filters-tooling.html#openedx_filters.filters.PipelineStep.run_filter
+        The current user is read from the active request via `crum`, so this filter only
+        runs meaningfully inside a request cycle. Note that `isArchivedByLearner` is
+        distinct from `isArchived`, which the platform sets based on whether the course
+        run itself has ended.
         """  # noqa: E501
-        # Extract course ID using Open edX course key pattern
-        # Course keys follow the format: course-v1:ORG+COURSE+RUN
-        pattern = r'(?P<course_id>course-v1:[^/]+)'
-
-        match = re.search(pattern, url)
-        if match:
-            course_id = match.group('course_id')
-
-            # Example: Redirect to external marketing site
-            new_url = f"https://example.com/new_about_page/{course_id}"
-
-            logger.debug(
-                f"Redirecting course about page for {course_id} from {url} to {new_url}"
-            )
-
-            # Return modified data
-            return {"url": new_url, "org": org}
-
-        # No course ID found - return original data unchanged
-        logger.debug(f"No course ID found in URL {url}, leaving unchanged")
-        return {"url": url, "org": org}
-
-        # Alternative patterns for different business logic:
-
-        # Organization-based routing:
-        # if org == "special_org":
-        #     new_url = f"https://special-site.com/courses/{course_id}"
-        #     return {"url": new_url, "org": org}
-
-        # Course type-based routing:
-        # if "MicroMasters" in course_id:
-        #     new_url = f"https://micromasters.example.com/{course_id}"
-        #     return {"url": new_url, "org": org}
-
-        # A/B testing implementation:
-        # import random
-        # if random.choice([True, False]):
-        #     new_url = f"https://variant-a.example.com/{course_id}"
-        # else:
-        #     new_url = f"https://variant-b.example.com/{course_id}"
-        # return {"url": new_url, "org": org}
+        request = crum.get_current_request()
+        if not (request and request.user):
+            return serialized_courserun
+        try:
+            is_archived_by_learner = CourseArchiveStatus.objects.get(
+                user=request.user, course_id=serialized_courserun["courseId"]
+            ).is_archived
+        except CourseArchiveStatus.DoesNotExist:
+            is_archived_by_learner = False
+        return {
+            "serialized_courserun": {
+                **serialized_courserun,
+                "isArchivedByLearner": is_archived_by_learner,
+            },
+        }

@@ -90,33 +90,35 @@ const courses = courseListData.visibleList;
 
 **Slot Props**: Each slot provides specific data. For CourseListSlot, see the [slot documentation](https://github.com/openedx/frontend-app-learner-dashboard/tree/master/src/plugin-slots/CourseListSlot#plugin-props).
 
-#### 2. Backend API Integration
+#### 2. Backend Data via the Filter Pipeline
+
+Rather than firing an extra GET to `course-archive-status/` on every dashboard
+load, the initial archive state is read directly off the slot props. The backend
+plugin uses an Open edX filter (see [`pipeline.py`](../backend-plugin-sample/src/openedx_plugin_sample/pipeline.py))
+to inject `isArchivedByLearner` into each courseRun in the Learner Home `/init`
+API response, so it arrives alongside the rest of the course data:
 
 ```jsx
-useEffect(() => {
-  const fetchArchivedCourses = async () => {
-    const client = getAuthenticatedHttpClient();
-    const lmsBaseUrl = getConfig().LMS_BASE_URL;
-
-    const response = await client.get(
-      `${lmsBaseUrl}/sample-plugin/api/v1/course-archive-status/`,
-      { params: { is_archived: true } }
-    );
-
-    const archivedCourseIds = new Set(
-      response.data.results.map((item) => item.course_id)
-    );
-    setArchivedCourses(archivedCourseIds);
-  };
-
-  fetchArchivedCourses();
-}, []);
+const [archivedCourses, setArchivedCourses] = useState(() => {
+  const initial = new Set();
+  (courseListData?.visibleList || []).forEach((courseData) => {
+    if (courseData.courseRun?.isArchivedByLearner) {
+      initial.add(courseData.courseRun.courseId);
+    }
+  });
+  return initial;
+});
 ```
 
+**Why this pattern**: One fewer round-trip per dashboard load, and the archive
+state is consistent with the rest of the course data from the same response.
+The REST API is still used for writes (archive/unarchive) — see the toggle
+handler below.
+
 **Key Patterns:**
-- **Authentication**: `getAuthenticatedHttpClient()` handles Open edX auth
+- **Filter-injected data**: Read `courseRun.isArchivedByLearner` straight from slot props
+- **Authentication** (for writes): `getAuthenticatedHttpClient()` handles Open edX auth
 - **Configuration**: `getConfig().LMS_BASE_URL` gets platform URLs
-- **Error Handling**: Try/catch blocks for API failures
 
 #### 3. Open edX UI Components
 
