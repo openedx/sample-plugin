@@ -84,7 +84,7 @@ const config = {
       light: {
         urls: {
           "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css",
-          "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand/dist/light.min.css"
+          "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css"
         },
       },
     },
@@ -103,7 +103,7 @@ const siteConfig: SiteConfig = {
   theme: {
     variants: {
       light: {
-        url: 'https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand/dist/light.min.css
+        url: 'https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css
       },
     },
   },
