@@ -1,132 +1,66 @@
 """
 Open edX Events signal handlers for the openedx_plugin_sample application.
 
-This module demonstrates how to consume Open edX Events (signals) to react to
-platform activities and integrate with external systems. Events are part of
-the Hooks Extension Framework and provide a stable way to extend Open edX.
-
-What Are Open edX Events?
-Events are signals sent when specific actions occur in the platform. Unlike
-traditional Django signals, Open edX Events have standardized data structures
-and are designed for external consumption.
+This module demonstrates how to consume Open edX Events to react to platform
+activity. Events are part of the Hooks Extension Framework and provide a
+stable way to extend Open edX without modifying core code.
 
 Key Concepts:
 - Events are fired at specific points in the platform lifecycle
-- Each event includes structured data (defined in openedx-events)
-- Event handlers can perform actions but cannot modify the event data
-- Events support both internal processing and external event bus integration
+- Each event delivers a structured data object (defined in openedx-events)
+- Event handlers can take action but cannot modify the event payload
+- Handlers must be imported from apps.py ready() so @receiver registers them
 
 Official Documentation:
 - Events Overview: https://docs.openedx.org/projects/openedx-events/en/latest/
 - Available Events: https://docs.openedx.org/projects/openedx-events/en/latest/reference/events.html
 - Consuming Events: https://docs.openedx.org/projects/openedx-events/en/latest/how-tos/consume-an-event.html
-- Hooks Framework: https://docs.openedx.org/en/latest/developers/concepts/hooks_extension_framework.html
-
-Registration Process:
-1. Import the event signal from openedx-events
-2. Create handler function with correct signature
-3. Decorate with @receiver
-4. Import this module in apps.py ready() method
-
-Event Data Structure:
-Each event defines specific data attributes. Check the event definition in the
-official documentation to understand available data:
-- Signal Reference: https://docs.openedx.org/projects/openedx-events/en/latest/reference/events.html
-- Data Objects: https://docs.openedx.org/projects/openedx-events/en/latest/reference/data.html
-- Example: COURSE_CATALOG_INFO_CHANGED provides catalog_info: CourseCatalogData
-
-Common Use Cases:
-- Integration with external systems (CRM, analytics, notifications)
-- Custom logging and audit trails
-- Triggering workflows in other services
-- Synchronizing data with external databases
+- Event Data Objects: https://docs.openedx.org/projects/openedx-events/en/latest/reference/data.html
 """
 
 import logging
 
 from django.dispatch import receiver
-from openedx_events.content_authoring.data import CourseCatalogData
-from openedx_events.content_authoring.signals import COURSE_CATALOG_INFO_CHANGED
+from openedx_events.learning.data import CourseEnrollmentData
+from openedx_events.learning.signals import COURSE_ENROLLMENT_CHANGED
+
+from .models import CourseArchiveStatus
 
 logger = logging.getLogger(__name__)
 
 
-@receiver(COURSE_CATALOG_INFO_CHANGED)
-def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **kwargs):  # pylint: disable=unused-argument # noqa: E501
+@receiver(COURSE_ENROLLMENT_CHANGED)
+def unarchive_on_verified_upgrade(
+    signal, sender, enrollment: CourseEnrollmentData, **kwargs
+):  # pylint: disable=unused-argument
     """
-    Handle course catalog information changes.
+    Unarchive a course on the learner's dashboard when they upgrade to verified.
 
-    This function demonstrates how to consume the COURSE_CATALOG_INFO_CHANGED event,
-    which is fired whenever course catalog information is updated in the platform.
+    If a learner has previously archived a course (CourseArchiveStatus.is_archived=True)
+    and then upgrades to the verified track, the course shouldn't stay tucked away
+    in their "Archived" section -- their renewed investment in the course is a
+    strong signal that they want it back in their active list.
 
-    Event Trigger Conditions:
-    - Course metadata is modified (name, description, etc.)
-    - Course schedule is updated
-    - Course visibility settings change
-    - Other catalog-related modifications
+    This is intentionally a one-time nudge, not a continuous rule: if the learner
+    re-archives the course later, we respect that choice. That's why we react to
+    the enrollment-change *event* rather than computing `isArchivedByLearner`
+    from enrollment mode in the filter pipeline.
 
-    Args:
-        signal: The signal instance that triggered this handler
-        sender: The model class that sent the signal
-        catalog_info (CourseCatalogData): Structured data about the course
-        **kwargs: Additional context parameters
-
-    CourseCatalogData Attributes:
-    Based on the official data structure documentation:
-    https://docs.openedx.org/projects/openedx-events/en/latest/reference/data.html#openedx_events.content_authoring.data.CourseCatalogData
-
-    - course_key (CourseKey): Unique course identifier
-    - name (str): Course display name
-    - schedule (CourseScheduleData): Start/end dates and pacing
-    - hidden (bool): Course visibility status
-
-    Real-World Use Cases:
-    - Sync course metadata with external systems (CRM, marketing sites)
-    - Update search indexes when course information changes
-    - Trigger email notifications to administrators
-    - Log changes for audit and compliance
-    - Update analytics dashboards with new course information
-
-    Example Implementation::
-
-        # Send to external CRM system
-        external_api.update_course(
-            course_id=str(catalog_info.course_key),
-            name=catalog_info.name,
-            is_hidden=catalog_info.hidden
-        )
-
-        # Update internal tracking
-        CourseChangeLog.objects.create(
-            course_key=catalog_info.course_key,
-            change_type='catalog_updated',
-            timestamp=timezone.now()
-        )
-
-    Performance Considerations:
-    - Keep processing lightweight (events should not block platform operations)
-    - Use asynchronous tasks for heavy processing (Celery, etc.)
-    - Handle exceptions gracefully to prevent platform disruption
+    Event reference:
+    https://docs.openedx.org/projects/openedx-events/en/latest/reference/events.html#openedx_events.learning.signals.COURSE_ENROLLMENT_CHANGED
     """
-    logging.info(f"Course catalog updated: {catalog_info.course_key}")
+    if not enrollment.is_active or enrollment.mode != "verified":
+        return
 
-    # Access available data from the event
-    logging.debug(f"Course name: {catalog_info.name}")
-    logging.debug(f"Course hidden: {catalog_info.hidden}")
+    updated = CourseArchiveStatus.objects.filter(
+        user_id=enrollment.user.id,
+        course_id=enrollment.course.course_key,
+        is_archived=True,
+    ).update(is_archived=False, archive_date=None)
 
-    # Example: Integrate with external systems
-    # try:
-    #     # Send to external system
-    #     external_system.notify_course_update(
-    #         course_id=str(catalog_info.course_key),
-    #         course_name=catalog_info.name,
-    #         is_hidden=catalog_info.hidden
-    #     )
-    # except Exception as e:
-    #     logging.error(f"Failed to notify external system: {e}")
-
-    # Example: Update internal tracking
-    # from .models import CourseArchiveStatus
-    # CourseArchiveStatus.objects.filter(
-    #     course_id=catalog_info.course_key
-    # ).update(last_catalog_update=timezone.now())
+    if updated:
+        logger.info(
+            "Unarchived course %s for user %s after verified upgrade",
+            enrollment.course.course_key,
+            enrollment.user.id,
+        )

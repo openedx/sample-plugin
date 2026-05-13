@@ -92,8 +92,8 @@ class SamplePluginConfig(AppConfig):
         #     "lms.djangoapp": {
         #         "relative_path": "signals",
         #         "receivers": [{
-        #             "receiver_func_name": "log_course_info_changed",
-        #             "signal_path": "openedx_events.content_authoring.signals.COURSE_CATALOG_INFO_CHANGED",
+        #             "receiver_func_name": "unarchive_on_verified_upgrade",
+        #             "signal_path": "openedx_events.learning.signals.COURSE_ENROLLMENT_CHANGED",
         #         }]
         #     }
         # }

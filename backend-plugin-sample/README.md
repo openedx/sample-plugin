@@ -184,40 +184,62 @@ def perform_create(self, serializer):
 
 ### Event Handler Example
 
+This plugin reacts to `COURSE_ENROLLMENT_CHANGED` to unarchive a course on the
+learner's dashboard when they upgrade to the verified track. The idea: a learner
+who has previously archived a course shouldn't have to dig it back out of their
+"Archived" section after upgrading -- their renewed investment is a strong
+signal that the course belongs back in their active list.
+
 ```python
-from openedx_events.content_authoring.signals import COURSE_CATALOG_INFO_CHANGED
+from openedx_events.learning.data import CourseEnrollmentData
+from openedx_events.learning.signals import COURSE_ENROLLMENT_CHANGED
 from django.dispatch import receiver
 
-@receiver(COURSE_CATALOG_INFO_CHANGED)
-def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **kwargs):
-    logging.info(f"{catalog_info.course_key} has been updated!")
-    # Add your custom business logic here
+@receiver(COURSE_ENROLLMENT_CHANGED)
+def unarchive_on_verified_upgrade(signal, sender, enrollment: CourseEnrollmentData, **kwargs):
+    if not enrollment.is_active or enrollment.mode != "verified":
+        return
+    CourseArchiveStatus.objects.filter(
+        user_id=enrollment.user.id,
+        course_id=enrollment.course.course_key,
+        is_archived=True,
+    ).update(is_archived=False, archive_date=None)
 ```
+
+**Why an event (not a filter)?** The unarchive is a *one-time nudge*: if the
+learner re-archives the course later, we respect that. Implementing this as a
+continuous rule in the filter pipeline (e.g. "any verified course is never
+archived") would override the learner's intent. Events fire at the moment a
+state change happens, which is exactly when this kind of one-shot reaction
+belongs.
 
 ### Available Events
 
 **Event Catalog**: [Open edX Events Reference](https://docs.openedx.org/projects/openedx-events/en/latest/reference/events.html)
 
 **Common Events:**
-- `COURSE_CATALOG_INFO_CHANGED` - Course information updated
+- `COURSE_ENROLLMENT_CHANGED` - Enrollment becomes active/inactive or changes mode
+- `COURSE_ENROLLMENT_CREATED` - Student newly enrolled in a course
 - `STUDENT_REGISTRATION_COMPLETED` - New user registered
 - `CERTIFICATE_CREATED` - Certificate generated for learner
-- `ENROLLMENT_CREATED` - Student enrolled in course
+- `COURSE_CATALOG_INFO_CHANGED` - Course catalog metadata updated
 
 ### Event Data Structure
 
-Each event includes specific data. For `COURSE_CATALOG_INFO_CHANGED`:
+Each event includes a specific data object. For `COURSE_ENROLLMENT_CHANGED`:
 
 ```python
-def log_course_info_changed(signal, sender, catalog_info: CourseCatalogData, **kwargs):
-    # catalog_info contains:
-    # - course_key: CourseKey object
-    # - name: Course display name
-    # - schedule: Course schedule information
-    # - hidden: Visibility status
+def unarchive_on_verified_upgrade(signal, sender, enrollment: CourseEnrollmentData, **kwargs):
+    # enrollment contains:
+    # - user: UserData (with .id, .is_active, .pii)
+    # - course: CourseData (with .course_key, .display_name, .start, .end)
+    # - mode: str (e.g. "audit", "verified", "honor")
+    # - is_active: bool
+    # - creation_date: datetime
+    # - created_by: UserData (optional)
 ```
 
-**Key Point**: Check the [event definition](https://docs.openedx.org/projects/openedx-events/en/latest/reference/events.html) to understand what data is available.
+**Key Point**: Check the [event data reference](https://docs.openedx.org/projects/openedx-events/en/latest/reference/data.html) to understand the exact fields available for each event.
 
 ### Signal Handler Registration
 
@@ -471,15 +493,19 @@ const response = await client.get(
 );
 ```
 
-### Events + API Integration
+### Events + Models Integration
 
 ```python
-@receiver(COURSE_CATALOG_INFO_CHANGED)
-def sync_course_archive_on_change(signal, sender, catalog_info, **kwargs):
-    # Update archive statuses when course info changes
+@receiver(COURSE_ENROLLMENT_CHANGED)
+def unarchive_on_verified_upgrade(signal, sender, enrollment, **kwargs):
+    # React to a verified upgrade by clearing the learner's archive flag
+    if not enrollment.is_active or enrollment.mode != "verified":
+        return
     CourseArchiveStatus.objects.filter(
-        course_id=catalog_info.course_key
-    ).update(last_synced=timezone.now())
+        user_id=enrollment.user.id,
+        course_id=enrollment.course.course_key,
+        is_archived=True,
+    ).update(is_archived=False, archive_date=None)
 ```
 
 ### Filters + Settings Integration
