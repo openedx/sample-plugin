@@ -39,3 +39,11 @@ waffle.Sample:
   ".. no_pii:": "This model has no PII"
 waffle.Switch:
   ".. no_pii:": "This model has no PII"
+openedx_catalog.CatalogCourse:
+  ".. no_pii:": "This model has no PII"
+openedx_catalog.CourseRun:
+  ".. no_pii:": "This model has no PII"
+organizations.HistoricalOrganization:
+  ".. no_pii:": "This model has no PII"
+organizations.HistoricalOrganizationCourse:
+  ".. no_pii:": "This model has no PII"
