@@ -16,6 +16,8 @@ import {
 } from "@openedx/paragon";
 import { Archive, Unarchive, MoreVert } from "@openedx/paragon/icons";
 
+import CourseCardRating from "./CourseCardRating";
+
 const CourseList = ({ courseListData }) => {
   // Seed the archived-course set from `courseRun.isArchivedByLearner`, which the
   // backend plugin's filter pipeline injects into each courseRun in the Learner
@@ -154,6 +156,7 @@ const CourseList = ({ courseListData }) => {
                 {courseData.course.shortDescription}
               </p>
             )}
+            <CourseCardRating courseRun={courseData.courseRun} />
           </Card.Section>
           <Card.Footer>
             <Button

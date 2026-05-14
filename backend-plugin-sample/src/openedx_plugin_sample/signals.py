@@ -21,10 +21,13 @@ Official Documentation:
 import logging
 
 from django.dispatch import receiver
+from openedx_catalog.models import CourseRun
+from openedx_events.content_authoring.data import XBlockData
+from openedx_events.content_authoring.signals import XBLOCK_PUBLISHED
 from openedx_events.learning.data import CourseEnrollmentData
 from openedx_events.learning.signals import COURSE_ENROLLMENT_CHANGED
 
-from .models import CourseArchiveStatus
+from .models import CourseArchiveStatus, CourseAverageRating
 
 logger = logging.getLogger(__name__)
 
@@ -64,3 +67,43 @@ def unarchive_on_verified_upgrade(
             enrollment.course.course_key,
             enrollment.user.id,
         )
+
+
+@receiver(XBLOCK_PUBLISHED)
+def recompute_course_average_on_publish(
+    signal, sender, xblock_info: XBlockData, **kwargs,
+):  # pylint: disable=unused-argument
+    """
+    Fully recompute the cached CourseAverageRating when a full course is
+    published.
+
+    Open edX does not (currently) ship a ``COURSE_PUBLISHED`` event. The closest
+    analog is ``XBLOCK_PUBLISHED``, which fires once per publish action in
+    Studio with the *highest* affected xblock's usage_key. We only care about
+    full-course publishes, since smaller publish actions (a single unit, a
+    section) don't change the set of units the course contains.
+
+    @@TODO: Pass the set of usage_keys still present in the published outline
+        to ``recompute_from_scratch`` so ratings for removed units are
+        excluded. The current POC simply averages over every UnitRating row
+        for the course, which is wrong if a previously-rated unit has since
+        been removed (its rating will still count).
+    """
+    if xblock_info.block_type != "course":
+        return
+
+    course_key = xblock_info.usage_key.course_key
+    try:
+        course_run = CourseRun.objects.get(course_key=str(course_key))
+    except CourseRun.DoesNotExist:
+        # No ratings could exist if we don't even know about the course yet.
+        return
+
+    avg, _ = CourseAverageRating.objects.get_or_create(course_run=course_run)
+    avg.recompute_from_scratch()
+    logger.info(
+        "Recomputed CourseAverageRating for %s: %s* over %d ratings",
+        course_key,
+        avg.average_stars,
+        avg.rating_count,
+    )

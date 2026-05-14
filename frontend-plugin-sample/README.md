@@ -1,6 +1,9 @@
 # Frontend Plugin Implementation Guide
 
-This directory contains a React component that demonstrates how to customize Open edX micro-frontends (MFEs) using the Frontend Plugin Framework. The plugin replaces the default course list in the learner dashboard with a custom implementation that includes course archiving functionality.
+This directory contains React components that demonstrate how to customize Open edX micro-frontends (MFEs) using the Frontend Plugin Framework. Two features are wired up side by side:
+
+- **Archive** — `CourseList` replaces the default course list on the learner-dashboard with one that adds per-learner archive/unarchive controls.
+- **Rating** — `RateThisContent` slots a 1-5 star widget below each unit in `frontend-app-learning`; `CourseCardRating` (used internally by `CourseList`) shows the resulting per-course average on each card.
 
 ## Table of Contents
 
@@ -16,13 +19,13 @@ This directory contains a React component that demonstrates how to customize Ope
 
 ## Overview
 
-This frontend plugin demonstrates **Open edX MFE customization** using the Frontend Plugin Framework to replace the course list component in the learner dashboard.
+This frontend plugin demonstrates **Open edX MFE customization** using the Frontend Plugin Framework against slots in two different MFEs.
 
 **What this plugin provides:**
-- **Custom CourseList Component**: Enhanced course display with archive functionality
+- **Custom CourseList Component**: Enhanced course display with archive functionality and inline per-course rating
+- **RateThisContent Component**: Per-unit 1-5 star rating widget for the learning MFE
 - **Backend API Integration**: Connects to the sample backend plugin APIs
-- **Slot Replacement Pattern**: Shows how to replace existing MFE components
-- **State Management**: React patterns for plugin development
+- **Slot Replacement and Insert Patterns**: Demonstrates both fully replacing a slot's default contents and inserting a new widget into a host slot
 - **Authentication Integration**: Uses Open edX authentication system
 
 **Official Documentation:**
@@ -92,11 +95,17 @@ const courses = courseListData.visibleList;
 
 #### 2. Backend Data via the Filter Pipeline
 
-Rather than firing an extra GET to `course-archive-status/` on every dashboard
-load, the initial archive state is read directly off the slot props. The backend
-plugin uses an Open edX filter (see [`pipeline.py`](../backend-plugin-sample/src/openedx_plugin_sample/pipeline.py))
-to inject `isArchivedByLearner` into each courseRun in the Learner Home `/init`
-API response, so it arrives alongside the rest of the course data:
+Rather than firing extra GETs for each card on every dashboard load, the
+initial archive state *and* the per-course average rating are read directly off
+the slot props. The backend plugin runs two filter pipeline steps (see
+[`pipeline.py`](../backend-plugin-sample/src/openedx_plugin_sample/pipeline.py))
+that inject extra keys onto each courseRun in the Learner Home `/init` response:
+
+- `isArchivedByLearner` (bool) — does the requesting user have this course archived?
+- `averageStars` (float or null) — cached per-course rating average
+- `ratingCount` (int) — number of unit ratings backing that average
+
+The component reads them straight off the slot props:
 
 ```jsx
 const [archivedCourses, setArchivedCourses] = useState(() => {
@@ -108,15 +117,18 @@ const [archivedCourses, setArchivedCourses] = useState(() => {
   });
   return initial;
 });
+
+// And inside each card:
+<CourseCardRating courseRun={courseData.courseRun} />
 ```
 
-**Why this pattern**: One fewer round-trip per dashboard load, and the archive
-state is consistent with the rest of the course data from the same response.
-The REST API is still used for writes (archive/unarchive) — see the toggle
-handler below.
+**Why this pattern**: One fewer round-trip per dashboard load, and the injected
+state stays consistent with the rest of the course data from the same response.
+The REST API is still used for writes (archive/unarchive, submit rating) — see
+the toggle handler below.
 
 **Key Patterns:**
-- **Filter-injected data**: Read `courseRun.isArchivedByLearner` straight from slot props
+- **Filter-injected data**: Read `courseRun.isArchivedByLearner` / `averageStars` / `ratingCount` straight from slot props
 - **Authentication** (for writes): `getAuthenticatedHttpClient()` handles Open edX auth
 - **Configuration**: `getConfig().LMS_BASE_URL` gets platform URLs
 
@@ -189,43 +201,66 @@ const handleArchiveToggle = async (courseId, isCurrentlyArchived) => {
 
 ## Slot Integration Patterns
 
-### CourseListSlot Integration
+This plugin targets two slots, in two different MFEs:
 
-**Target Slot**: `course_list_slot` in learner dashboard
+| Slot ID | MFE | Component | Operation |
+|---------|-----|-----------|-----------|
+| `org.openedx.frontend.learner_dashboard.course_list.v1` | `frontend-app-learner-dashboard` | `CourseList` | `Hide` default widget + `Insert` ours |
+| `org.openedx.frontend.learning.sequence_container.v1` | `frontend-app-learning` | `RateThisContent` | `Insert` ours alongside default |
 
-**Configuration Pattern** (for local development in `env.config.jsx`):
+### CourseList slot (Hide + Insert)
+
+The default `default_contents` widget is hidden so it doesn't render *next to*
+our replacement. We then insert our `CourseList` widget into the same slot:
 
 ```javascript
-import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
-import { CourseList } from '@openedx/plugin-sample';
-
-const config = {
-  pluginSlots: {
-    course_list_slot: {
-      keepDefault: false,  // Hide original component
-      plugins: [
-        {
-          op: PLUGIN_OPERATIONS.Insert,
-          widget: {
-            id: 'custom_course_list',
-            type: DIRECT_PLUGIN,
-            priority: 60,
-            RenderWidget: CourseList  // Your custom component
-          },
-        },
-      ],
+'org.openedx.frontend.learner_dashboard.course_list.v1': {
+  plugins: [
+    {
+      op: PLUGIN_OPERATIONS.Hide,
+      widgetId: 'default_contents',
     },
-  },
-}
+    {
+      op: PLUGIN_OPERATIONS.Insert,
+      widget: {
+        id: 'openedx_plugin_sample_course_list',
+        type: DIRECT_PLUGIN,
+        priority: 50,
+        RenderWidget: CourseList,
+      },
+    },
+  ],
+},
+```
+
+### RateThisContent slot (Insert only)
+
+The learning MFE's sequence-container slot has no widget we need to displace,
+so a single `Insert` is enough:
+
+```javascript
+'org.openedx.frontend.learning.sequence_container.v1': {
+  plugins: [
+    {
+      op: PLUGIN_OPERATIONS.Insert,
+      widget: {
+        id: 'openedx_plugin_sample_rate_this_content',
+        type: DIRECT_PLUGIN,
+        priority: 50,
+        RenderWidget: RateThisContent,
+      },
+    },
+  ],
+},
 ```
 
 ### Plugin Configuration Options
 
 | Option | Purpose | Values |
 |--------|---------|--------|
-| **keepDefault** | Show/hide original component | `true`, `false` |
-| **op** | Plugin operation type | `Insert`, `Modify`, `Replace` |
-| **priority** | Loading order | Higher numbers load later |
+| **op** | Plugin operation type | `Insert`, `Hide`, `Modify`, `Wrap`, `Replace` |
+| **widgetId** | Identifies which existing widget to act on (for `Hide`/`Modify`/`Wrap`/`Replace`) | The host slot's widget ID, often `'default_contents'` |
+| **priority** | Loading order within the slot | Higher numbers render later |
 | **type** | Plugin implementation type | `DIRECT_PLUGIN`, `IFRAME_PLUGIN` |
 | **RenderWidget** | Your React component | Component reference |
 
@@ -312,11 +347,20 @@ if (response.data && Array.isArray(response.data)) {
 
 ### Local Development Setup
 
-#### Step 1: Create module.config.js
+The plugin's two slots live in two different MFEs:
 
-Create `module.config.js` in your MFE root, not committed to the repo.
-This tells the MFE to load/use the `@openedx/sample-plugin` package
-as a source (non-built) distribution .
+- `frontend-app-learner-dashboard` — for the Archive `CourseList` (and the
+  embedded per-course rating display)
+- `frontend-app-learning` — for the per-unit `RateThisContent` widget
+
+You only need to write the `module.config.js` and `env.config.jsx` files once,
+then drop a copy of each into the root of every MFE you want to customize.
+
+#### Step 1: Create `module.config.js` (per MFE)
+
+In the MFE root, create `module.config.js` (do not commit it). This tells the
+MFE's webpack to load `@openedx/plugin-sample` from your local checkout instead
+of from npm, so you can iterate on the plugin without publishing:
 
 ```javascript
 module.exports = {
@@ -324,72 +368,118 @@ module.exports = {
     {
       moduleName: '@openedx/plugin-sample',
       dir: '/path/to/sample-plugin/frontend-plugin-sample',
-      dist: 'src'
+      dist: 'src',
     },
   ],
 };
 ```
 
-#### Step 2: Create env.config.jsx
+#### Step 2: Create a shared `env.config.jsx` and drop a copy into each MFE
 
-Create `env.config.jsx` in your MFE root, not committed to the repo.
-This plugs the sample widget into the course list slot.
+`env.config.jsx` is how each MFE resolves its plugin-slot configuration at
+build/runtime. A given MFE only acts on the slots it actually owns and silently
+ignores the rest, so the easiest thing for development is to keep **one
+`env.config.jsx`** that lists every slot this plugin targets and copy the same
+file into each MFE root you're customizing.
 
-```javascript
+```jsx
+// env.config.jsx -- copy this file into the root of every MFE you want to
+// customize (frontend-app-learner-dashboard, frontend-app-learning, ...).
+// Each MFE only acts on the slots it owns and ignores the others.
+
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
-import { CourseList } from '@openedx/plugin-sample';
+import { CourseList, RateThisContent } from '@openedx/plugin-sample';
 
 const config = {
   pluginSlots: {
-    course_list_slot: {
-      keepDefault: false,
+    // Lives in: frontend-app-learner-dashboard
+    // Effect: hides the default course list and renders our archive-aware one,
+    // which also displays the per-course rating injected by the backend filter.
+    'org.openedx.frontend.learner_dashboard.course_list.v1': {
+      plugins: [
+        {
+          op: PLUGIN_OPERATIONS.Hide,
+          widgetId: 'default_contents',
+        },
+        {
+          op: PLUGIN_OPERATIONS.Insert,
+          widget: {
+            id: 'openedx_plugin_sample_course_list',
+            type: DIRECT_PLUGIN,
+            priority: 50,
+            RenderWidget: CourseList,
+          },
+        },
+      ],
+    },
+
+    // Lives in: frontend-app-learning
+    // Effect: inserts a "Rate this content" widget below each unit.
+    'org.openedx.frontend.learning.sequence_container.v1': {
       plugins: [
         {
           op: PLUGIN_OPERATIONS.Insert,
           widget: {
-            id: 'custom_course_list',
+            id: 'openedx_plugin_sample_rate_this_content',
             type: DIRECT_PLUGIN,
-            priority: 60,
-            RenderWidget: CourseList
+            priority: 50,
+            RenderWidget: RateThisContent,
           },
         },
       ],
     },
   },
-}
+};
 
 export default config;
 ```
-**Purpose**: Webpack uses your local plugin code instead of the installed package.
 
-#### Step 3: Start Development
+Do not commit `env.config.jsx` into the MFE repos — it's your local override.
 
-Now, from the MFE repository root, install requirements and run the dev server.
+**Notes:**
+- Slot IDs are fully qualified (`org.openedx.frontend.<mfe>.<slot_name>.v<n>`).
+  Don't use the short names you sometimes see in older docs — those won't match.
+- Use `PLUGIN_OPERATIONS.Hide` + `Insert` to fully replace a slot's default
+  widget. `keepDefault: false` (an older alternative) works in some slot
+  versions but the Hide/Insert pattern is what the Tutor plugin in this repo
+  emits, so the dev and prod configurations stay consistent.
+- The plugin's npm package is `@openedx/plugin-sample`. Step 1's
+  `module.config.js` is what makes that import resolve to your local source.
+
+#### Step 3: Start the MFE dev server
+
+From the MFE repository root:
 
 ```bash
-# Install requirements
+# Install MFE dependencies (just once).
 npm ci
 
-# If running Tutor:
-tutor mounts add .  # Instruct tutor-mfe to redict requests to this local MFE devserver
-tutor dev reboot -d mfe  
-npm run dev
+# If you're running Tutor, point its MFE container at your local devserver:
+tutor mounts add .
+tutor dev reboot -d mfe
 
-# If not running Tutor:
-npm start
+# Then run the MFE devserver itself:
+npm run dev        # if running under Tutor
+# or
+npm start          # if running standalone (no Tutor)
 ```
+
+Repeat for the second MFE if you want to develop both features at once.
 
 ### Development vs Production Configuration
 
 **Local Development**:
-- Uses `env.config.jsx` for slot configuration
-- Uses `module.config.js` for local code loading
-- Hot reload for faster development
+- One shared `env.config.jsx` that lists every slot this plugin targets,
+  copied into each MFE root you want to customize
+- A matching `module.config.js` in each MFE root, pointing at your local checkout
+- Hot reload via `npm run dev` / `npm start`
 
 **Production Deployment**:
-- Configuration via Tutor plugins
-- Plugin installed as npm package
-- Optimized builds and caching
+- Equivalent slot configuration is emitted by the Tutor plugin
+  ([`tutor-contrib-sample/tutorsample/plugin.py`](../tutor-contrib-sample/tutorsample/plugin.py))
+  via `PLUGIN_SLOTS.add_item(...)`
+- The plugin is installed as the published `@openedx/plugin-sample` npm package
+- Optimized production builds; no local-source mounting
 
 ### Testing Frontend Plugins
 
@@ -430,20 +520,43 @@ Test within the actual MFE environment:
 **Tutor Plugin Configuration** (see [`../tutor-contrib-sample/README.md`](../tutor-contrib-sample/README.md)):
 
 ```python
-# In tutor plugin
-PLUGIN_SLOTS.add_items([
-    (
-        "learner-dashboard",
-        "custom_course_list",
-        """
-        {
-          op: PLUGIN_OPERATIONS.Insert,
-          type: DIRECT_PLUGIN,
-          priority: 50,
-          RenderWidget: CourseList
-        }"""
-    ),
-])
+from tutormfe.hooks import PLUGIN_SLOTS
+
+# Archive: replace the default course list on the learner dashboard.
+PLUGIN_SLOTS.add_item((
+    "learner-dashboard",
+    "org.openedx.frontend.learner_dashboard.course_list.v1",
+    """
+    {
+      op: PLUGIN_OPERATIONS.Hide,
+      widgetId: 'default_contents',
+    },
+    {
+      op: PLUGIN_OPERATIONS.Insert,
+      widget: {
+        id: 'openedx_plugin_sample_course_list',
+        type: DIRECT_PLUGIN,
+        priority: 50,
+        RenderWidget: CourseList,
+      },
+    }""",
+))
+
+# Rating: add the per-unit rating widget to the learning MFE.
+PLUGIN_SLOTS.add_item((
+    "learning",
+    "org.openedx.frontend.learning.sequence_container.v1",
+    """
+    {
+      op: PLUGIN_OPERATIONS.Insert,
+      widget: {
+        id: 'openedx_plugin_sample_rate_this_content',
+        type: DIRECT_PLUGIN,
+        priority: 50,
+        RenderWidget: RateThisContent,
+      },
+    }""",
+))
 ```
 
 ### Performance Considerations
