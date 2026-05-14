@@ -306,29 +306,34 @@ if (response.data && Array.isArray(response.data)) {
 
 ### Prerequisites
 
-1. **MFE Setup**: Have a learner dashboard MFE running locally
+1. **Tutor & Tutor-MFE Setup**: Tutor is installed and launched in `dev` mode.
 2. **Backend Plugin**: Install the backend plugin (see [`../backend-plugin-sample/README.md`](../backend-plugin-sample/README.md))
 3. **Node.js**: Version 16+ with npm or yarn
 
 ### Local Development Setup
 
-#### Step 0: Build Plugin
+#### Step 1: Create module.config.js
 
-```bash
-cd /path/to/sample-plugin/frontend-plugin-sample
-npm run build
-```
+Create `module.config.js` in your MFE root, not committed to the repo.
+This tells the MFE to use install the `@openedx/sample-plugin` package
+as a source (non-built) distribution .
 
-#### Step 1: Install Plugin Package
-
-```bash
-# In your MFE directory (e.g., frontend-app-learner-dashboard)
-npm install /path/to/sample-plugin/frontend-plugin-sample
+```javascript
+module.exports = {
+  localModules: [
+    {
+      moduleName: '@openedx/plugin-sample',
+      dir: '/path/to/sample-plugin/frontend-plugin-sample',
+      dist: 'src'
+    },
+  ],
+};
 ```
 
 #### Step 2: Create env.config.jsx
 
-Create `env.config.jsx` in your MFE root (not committed to repo):
+Create `env.config.jsx` in your MFE root, not committed to the repo.
+This plugs the sample widget into the course list slot.
 
 ```javascript
 import { DIRECT_PLUGIN, PLUGIN_OPERATIONS } from '@openedx/frontend-plugin-framework';
@@ -355,29 +360,22 @@ const config = {
 
 export default config;
 ```
-
-#### Step 3: Create module.config.js
-
-Create `module.config.js` for local development:
-
-```javascript
-module.exports = {
-  localModules: [
-    {
-      moduleName: '@openedx/plugin-sample',
-      dir: '/path/to/sample-plugin/frontend-plugin-sample'
-    },
-  ],
-};
-```
-
 **Purpose**: Webpack uses your local plugin code instead of the installed package.
 
-#### Step 4: Start Development
+#### Step 3: Start Development
+
+Now, from the MFE repository root, install requirements and run the dev server.
 
 ```bash
-# In your MFE directory
+# Install requirements
 npm ci
+
+# If running Tutor:
+tutor mounts add .  # Instruct tutor-mfe to redict requests to this local MFE devserver
+tutor dev reboot -d mfe  
+npm run dev
+
+# If not running Tutor:
 npm start
 ```
 

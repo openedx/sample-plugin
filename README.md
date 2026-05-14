@@ -52,9 +52,9 @@ tutor mounts add "$PWD/backend-plugin-sample"
 tutor dev launch  
 
 # Frontend Plugin Setup (for learner-dashboard MFE development)
-npm install $PWD/frontend-plugin-sample
 # Add env.config.jsx and module.config.js (see frontend-plugin-sample/README.md)
-npm start
+# Then, install and run.
+cd path/to/frontend-app-learner-dashboard && npm ci && npm run dev
 ```
 
 ### Option 2: Development without Tutor
