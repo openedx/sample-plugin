@@ -32,6 +32,7 @@ dependencies = [
     "djangorestframework",
     "django-filter",
     "edx-opaque-keys",
+    "openedx-core",
     "openedx-events",
     "openedx-filters",
     "openedx-atlas",

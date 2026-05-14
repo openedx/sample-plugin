@@ -54,7 +54,7 @@ def unarchive_on_verified_upgrade(
 
     updated = CourseArchiveStatus.objects.filter(
         user_id=enrollment.user.id,
-        course_id=enrollment.course.course_key,
+        course_run__course_key=enrollment.course.course_key,
         is_archived=True,
     ).update(is_archived=False, archive_date=None)
 

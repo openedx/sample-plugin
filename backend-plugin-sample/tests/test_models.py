@@ -8,6 +8,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from opaque_keys.edx.keys import CourseKey
+from openedx_catalog.api import create_course_run_for_modulestore_course_with
 
 from openedx_plugin_sample.models import CourseArchiveStatus
 
@@ -38,24 +39,27 @@ def staff_user():
 
 
 @pytest.fixture
-def course_key():
+def course_run():
     """
-    Create and return a test course key.
+    Create and return a test CourseRun (plus its Organization and CatalogCourse).
     """
-    return CourseKey.from_string("course-v1:edX+DemoX+Demo_Course")
+    return create_course_run_for_modulestore_course_with(
+        CourseKey.from_string("course-v1:edX+DemoX+Demo_Course"),
+        title="Demo Course",
+    )
 
 
 @pytest.mark.django_db
-def test_course_archive_status_creation(user, course_key):
+def test_course_archive_status_creation(user, course_run):
     """
     Test that a CourseArchiveStatus can be created with valid data.
     """
     course_archive_status = CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=False
+        course_run=course_run, user=user, is_archived=False
     )
 
     assert course_archive_status.pk is not None
-    assert course_archive_status.course_id == course_key
+    assert course_archive_status.course_run == course_run
     assert course_archive_status.user == user
     assert course_archive_status.is_archived is False
     assert course_archive_status.archive_date is None
@@ -64,35 +68,35 @@ def test_course_archive_status_creation(user, course_key):
 
 
 @pytest.mark.django_db
-def test_course_archive_status_uniqueness(user, course_key):
+def test_course_archive_status_uniqueness(user, course_run):
     """
-    Test that a CourseArchiveStatus must be unique per user and course_id.
+    Test that a CourseArchiveStatus must be unique per user and course_run.
     """
     CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=False
+        course_run=course_run, user=user, is_archived=False
     )
 
-    # Creating another with same user and course_id should raise an IntegrityError
+    # Creating another with same user and course_run should raise an IntegrityError
     with pytest.raises(IntegrityError):
         CourseArchiveStatus.objects.create(
-            course_id=course_key, user=user, is_archived=True
+            course_run=course_run, user=user, is_archived=True
         )
 
 
 @pytest.mark.django_db
-def test_course_archive_status_str_method(user, course_key):
+def test_course_archive_status_str_method(user, course_run):
     """
     Test the string representation of CourseArchiveStatus.
     """
     course_archive_status = CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=True
+        course_run=course_run, user=user, is_archived=True
     )
 
-    expected_str = f"{course_key} - {user.username} - Archived"
+    expected_str = f"{course_run.course_key} - {user.username} - Archived"
     assert str(course_archive_status) == expected_str
 
     course_archive_status.is_archived = False
     course_archive_status.save()
 
-    expected_str = f"{course_key} - {user.username} - Not Archived"
+    expected_str = f"{course_run.course_key} - {user.username} - Not Archived"
     assert str(course_archive_status) == expected_str

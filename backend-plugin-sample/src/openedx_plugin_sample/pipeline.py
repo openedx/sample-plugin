@@ -35,7 +35,7 @@ Common Use Cases:
 - Data transformation and validation
 - Integration with external systems
 - Custom business logic implementation
-"""  # pylint: disable=line-too-long
+"""
 
 import logging
 
@@ -78,7 +78,8 @@ class AddArchiveStatusToLearnerHomeCourseRun(PipelineStep):
             return serialized_courserun
         try:
             is_archived_by_learner = CourseArchiveStatus.objects.get(
-                user=request.user, course_id=serialized_courserun["courseId"]
+                user=request.user,
+                course_run__course_key=serialized_courserun["courseId"],
             ).is_archived
         except CourseArchiveStatus.DoesNotExist:
             is_archived_by_learner = False

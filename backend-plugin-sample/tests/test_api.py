@@ -8,6 +8,7 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from opaque_keys.edx.keys import CourseKey
+from openedx_catalog.api import create_course_run_for_modulestore_course_with
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -70,12 +71,24 @@ def course_key():
 
 
 @pytest.fixture
-def course_archive_status(user, course_key):
+def course_run(course_key):
+    """
+    Create and return a test CourseRun (plus its Organization and CatalogCourse)
+    matching the `course_key` fixture, so that API requests that POST/PATCH the
+    public `course_id` string can resolve it to this CourseRun.
+    """
+    return create_course_run_for_modulestore_course_with(
+        course_key, title="Demo Course"
+    )
+
+
+@pytest.fixture
+def course_archive_status(user, course_run):
     """
     Create and return a test course archive status.
     """
     return CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=False
+        course_run=course_run, user=user, is_archived=False
     )
 
 
@@ -93,7 +106,7 @@ def test_list_course_archive_status_authenticated(
     assert response.status_code == status.HTTP_200_OK
     assert response.data["count"] == 1
     assert response.data["results"][0]["course_id"] == str(
-        course_archive_status.course_id
+        course_archive_status.course_run.course_key
     )
     assert response.data["results"][0]["user"] == user.id
     assert (
@@ -114,17 +127,23 @@ def test_list_course_archive_status_unauthenticated(api_client):
 
 @pytest.mark.django_db
 def test_list_course_archive_status_staff_can_see_all(
-    api_client, staff_user, user, another_user, course_key
+    api_client, staff_user, user, another_user, course_run
 ):
     """
     Test that a staff user can list all course archive statuses.
     """
+    # A second CourseRun (with its own CatalogCourse/Organization) for the second status.
+    course_run_2 = create_course_run_for_modulestore_course_with(
+        CourseKey.from_string("course-v1:edX+DemoX+Demo_Course2"),
+        title="Demo Course 2",
+    )
+
     # Create archive statuses for both users
     CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=False
+        course_run=course_run, user=user, is_archived=False
     )
     CourseArchiveStatus.objects.create(
-        course_id=CourseKey.from_string("course-v1:edX+DemoX+Demo_Course2"),
+        course_run=course_run_2,
         user=another_user,
         is_archived=True,
     )
@@ -138,7 +157,7 @@ def test_list_course_archive_status_staff_can_see_all(
 
 
 @pytest.mark.django_db
-def test_create_course_archive_status(api_client, user, course_key):
+def test_create_course_archive_status(api_client, user, course_key, course_run):
     """
     Test that a user can create a course archive status.
     """
@@ -159,13 +178,14 @@ def test_create_course_archive_status(api_client, user, course_key):
 
     # Verify in database
     course_archive_status = CourseArchiveStatus.objects.get(
-        course_id=course_key, user=user
+        course_run=course_run, user=user
     )
     assert course_archive_status.is_archived is True
     assert course_archive_status.archive_date is not None
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("course_run")
 def test_create_course_archive_status_for_another_user(
     api_client, user, another_user, course_key
 ):
@@ -185,6 +205,7 @@ def test_create_course_archive_status_for_another_user(
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("course_run")
 def test_staff_create_course_archive_status_for_another_user(
     api_client, staff_user, user, course_key
 ):
@@ -281,7 +302,9 @@ def test_staff_can_update_other_user_course_archive_status(
 
 # New tests for optional user field behavior
 @pytest.mark.django_db
-def test_create_course_archive_status_without_user_field(api_client, user, course_key):
+def test_create_course_archive_status_without_user_field(
+    api_client, user, course_key, course_run
+):
     """
     Test that a user can create a course archive status without specifying user field.
     The user field should default to the current user.
@@ -307,7 +330,7 @@ def test_create_course_archive_status_without_user_field(api_client, user, cours
 
     # Verify in database
     course_archive_status = CourseArchiveStatus.objects.get(
-        course_id=course_key, user=user
+        course_run=course_run, user=user
     )
     assert course_archive_status.is_archived is True
     assert course_archive_status.user == user
@@ -340,7 +363,7 @@ def test_update_course_archive_status_without_user_field(api_client, user, cours
 
 @pytest.mark.django_db
 def test_staff_create_with_explicit_user_override(
-    api_client, staff_user, user, course_key
+    api_client, staff_user, user, course_key, course_run
 ):
     """
     Test that staff can explicitly set user field to override default behavior.
@@ -361,7 +384,7 @@ def test_staff_create_with_explicit_user_override(
 
     # Verify in database
     course_archive_status = CourseArchiveStatus.objects.get(
-        course_id=course_key, user=user
+        course_run=course_run, user=user
     )
     assert course_archive_status.user == user
     assert course_archive_status.user != staff_user
@@ -369,14 +392,14 @@ def test_staff_create_with_explicit_user_override(
 
 @pytest.mark.django_db
 def test_staff_update_with_explicit_user_override(
-    api_client, staff_user, user, another_user, course_key
+    api_client, staff_user, user, another_user, course_run
 ):
     """
     Test that staff can explicitly change user field when updating.
     """
     # Create initial record for user
     initial_status = CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=False
+        course_run=course_run, user=user, is_archived=False
     )
 
     api_client.force_authenticate(user=staff_user)
@@ -400,6 +423,7 @@ def test_staff_update_with_explicit_user_override(
 
 
 @pytest.mark.django_db
+@pytest.mark.usefixtures("course_run")
 def test_regular_user_cannot_override_user_field_create(
     api_client, user, another_user, course_key
 ):
@@ -420,7 +444,7 @@ def test_regular_user_cannot_override_user_field_create(
 
 @pytest.mark.django_db
 def test_staff_create_without_user_field_defaults_to_current_user(
-    api_client, staff_user, course_key
+    api_client, staff_user, course_key, course_run
 ):
     """
     Test that even staff users get records created for themselves when no user specified.
@@ -441,6 +465,6 @@ def test_staff_create_without_user_field_defaults_to_current_user(
 
     # Verify in database
     course_archive_status = CourseArchiveStatus.objects.get(
-        course_id=course_key, user=staff_user
+        course_run=course_run, user=staff_user
     )
     assert course_archive_status.user == staff_user

@@ -5,6 +5,7 @@ Views for the openedx_plugin_sample app.
 import logging
 
 from django.utils import timezone
+from django_filters import rest_framework as django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
@@ -64,6 +65,39 @@ class CourseArchiveStatusThrottle(UserRateThrottle):
     rate = "60/minute"
 
 
+class CourseArchiveStatusFilterSet(django_filters.FilterSet):
+    """
+    FilterSet for CourseArchiveStatus.
+
+    The model stores a FK to CourseRun, but the public API filters and orders
+    by the course_key string (never by the internal CourseRun PK).
+    """
+
+    # Map ?course_id=course-v1:... onto the FK's course_key column.
+    course_id = django_filters.CharFilter(field_name="course_run__course_key")
+
+    # Expose ?ordering=course_id (and other fields) without leaking the
+    # double-underscore FK lookup path.
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("course_run__course_key", "course_id"),
+            ("user", "user"),
+            ("is_archived", "is_archived"),
+            ("archive_date", "archive_date"),
+            ("created_at", "created_at"),
+            ("updated_at", "updated_at"),
+        )
+    )
+
+    class Meta:
+        """
+        FilterSet Meta options for CourseArchiveStatus.
+        """
+
+        model = CourseArchiveStatus
+        fields = ["course_id", "user", "is_archived"]
+
+
 class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
     """
     API viewset for CourseArchiveStatus.
@@ -81,15 +115,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         CourseArchiveStatusThrottle,
     ]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
-    filterset_fields = ["course_id", "user", "is_archived"]
-    ordering_fields = [
-        "course_id",
-        "user",
-        "is_archived",
-        "archive_date",
-        "created_at",
-        "updated_at",
-    ]
+    filterset_class = CourseArchiveStatusFilterSet
     ordering = ["-updated_at"]
 
     def get_queryset(self):
@@ -104,8 +130,9 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         # Validate query parameters to prevent injection
         self._validate_query_params()
 
-        # Always use select_related to avoid N+1 queries
-        base_queryset = CourseArchiveStatus.objects.select_related("user")
+        # Always use select_related to avoid N+1 queries when accessing
+        # related user and course_run (for course_key) fields.
+        base_queryset = CourseArchiveStatus.objects.select_related("user", "course_run")
 
         if user.is_staff or user.is_superuser:
             return base_queryset
@@ -172,7 +199,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         # Log at debug level for normal operation
         logger.debug(
             "CourseArchiveStatus created: course_id=%s, user=%s, is_archived=%s",
-            instance.course_id,
+            instance.course_run.course_key,
             instance.user.username,
             instance.is_archived,
         )
@@ -218,7 +245,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         # Log at debug level
         logger.debug(
             "CourseArchiveStatus updated: course_id=%s, user=%s, is_archived=%s",
-            updated_instance.course_id,
+            updated_instance.course_run.course_key,
             updated_instance.user.username,
             updated_instance.is_archived,
         )
@@ -232,7 +259,7 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
         # Log at debug level before deletion
         logger.debug(
             "CourseArchiveStatus deleted: course_id=%s, user=%s, by=%s",
-            instance.course_id,
+            instance.course_run.course_key,
             instance.user.username,
             self.request.user.username,
         )

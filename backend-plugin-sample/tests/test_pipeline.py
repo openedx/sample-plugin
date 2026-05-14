@@ -9,6 +9,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.contrib.auth import get_user_model
 from opaque_keys.edx.keys import CourseKey
+from openedx_catalog.api import create_course_run_for_modulestore_course_with
 
 from openedx_plugin_sample.models import CourseArchiveStatus
 from openedx_plugin_sample.pipeline import AddArchiveStatusToLearnerHomeCourseRun
@@ -32,6 +33,17 @@ def course_key():
     Create and return a test course key.
     """
     return CourseKey.from_string("course-v1:edX+DemoX+Demo_Course")
+
+
+@pytest.fixture
+def course_run(course_key):
+    """
+    Create and return a test CourseRun (plus its Organization and CatalogCourse)
+    matching the `course_key` fixture, so CourseArchiveStatus rows can FK to it.
+    """
+    return create_course_run_for_modulestore_course_with(
+        course_key, title="Demo Course"
+    )
 
 
 @pytest.fixture
@@ -64,14 +76,14 @@ def mock_current_request(user):
 
 @pytest.mark.django_db
 def test_archived_courserun_gets_is_archived_by_learner_true(
-    user, course_key, serialized_courserun, mock_current_request  # pylint: disable=unused-argument
+    user, course_key, course_run, serialized_courserun, mock_current_request  # pylint: disable=unused-argument
 ):
     """
     Test that the filter adds isArchivedByLearner=True when the learner has
     archived this course.
     """
     CourseArchiveStatus.objects.create(
-        course_id=course_key, user=user, is_archived=True
+        course_run=course_run, user=user, is_archived=True
     )
 
     result = AddArchiveStatusToLearnerHomeCourseRun(
