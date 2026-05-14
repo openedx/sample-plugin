@@ -315,7 +315,7 @@ if (response.data && Array.isArray(response.data)) {
 #### Step 1: Create module.config.js
 
 Create `module.config.js` in your MFE root, not committed to the repo.
-This tells the MFE to use install the `@openedx/sample-plugin` package
+This tells the MFE to load/use the `@openedx/sample-plugin` package
 as a source (non-built) distribution .
 
 ```javascript
