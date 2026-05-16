@@ -61,7 +61,7 @@ hooks.Filters.ENV_PATCHES.add_item(
 2. Navigate to your Tutor config directory (you can find this by running `tutor config printroot`)
 3. From your config directory, navigate to `env/plugins/paragon` (the full path on my dev machine is `~/.local/share/tutor-main/env/plugins/paragon`)
 4. You should see some directories in there, find the `theme-sources` directory.
-5. Place this theme's [`color.json` file](./src/tokens/src/themes/light/global/color.json) in the appropriate subdirectory of the `theme-sources` directory.
+5. Place this theme's [`color.json` file](./tokens/src/themes/light/global/color.json) in the appropriate subdirectory of the `theme-sources` directory.
 ```sh
 $ tree ~/.local/share/tutor-main/env/plugins/paragon
 ├── [...]

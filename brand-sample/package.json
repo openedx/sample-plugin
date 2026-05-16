@@ -16,8 +16,9 @@
   "scripts": {
     "build-tokens": "paragon build-tokens --source ./tokens/src --build-dir ./paragon/css --source-tokens-only --exclude-core",
     "build-scss": "paragon build-scss --themesPath ./paragon/css/themes --defaultThemeVariants light --excludeCore",
-    "build": "make build",
-    "build:watch": "nodemon --ignore dist -x \"make build\"",
+    "clean": "rm -rf dist && mkdir dist",
+    "build": "npm run clean && npm run build-tokens && npm run build-scss",
+    "build:watch": "nodemon --ignore dist -x \"npm run build\"",
     "paragon:help": "paragon help"
   },
   "devDependencies": {
