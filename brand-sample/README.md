@@ -105,7 +105,7 @@ hooks.Filters.ENV_PATCHES.add_item(
 
 ### jsdeliver without Tutor
 
-Within each MFE, configure its `env.config.js` to install this theme:
+Within each MFE, configure its `env.config.js[x]` to install this theme:
 
 ```js
 const config = {
@@ -124,7 +124,7 @@ const config = {
 export default config;
 ```
 
-If you are running a frontend-base site, configure its `env.config.js` to install this theme:
+If you are running a frontend-base site, add to the `SiteConfig` object in your `site.config.ts[x]`:
 
 ```tsx
 const siteConfig: SiteConfig = {
