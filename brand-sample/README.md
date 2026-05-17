@@ -1,111 +1,30 @@
 # brand-sample
 
-**This is a simple example brand package that changes the `brand` colors to an autumn-inspired palette.**
+A small Paragon brand package that recolors Open edX with an autumn-inspired palette, demonstrating how to use the [design tokens](https://github.com/openedx/paragon) interface to theme platform MFEs.
 
-### Before
-![Screenshot of the Authn MFE with this brand package enabled](./docs/images/authn-without-theme.png)
-
-### After
-![Screenshot of the Authn MFE with this brand package enabled](./docs/images/authn-with-theme.png)
-
-## Using this brand package
-
-Here are 4 different approaches to using this brand package.
+| Before | After |
+|---|---|
+| ![Authn MFE without theme](./docs/images/authn-without-theme.png) | ![Authn MFE with theme](./docs/images/authn-with-theme.png) |
 
 > [!IMPORTANT]
-> These instructions assume that you have an Open edX environment that supports design tokens:
-> * **Paragon >= 23**
-> * **Open edX "Teak" release or later**
-> * A provisioned Open edX dev environment, either:
->   * **Tutor >= 20**
->   * A "bare-metal" setup
+> Requires an Open edX environment with design-token support: Paragon >= 23 and the "Teak" release or later.
 
-### Local brand dev using Tutor + Tutor Paragon Plugin
+## How to use it
 
-This will allow you to hack on the brand, recompile it, and preview it in your local Tutor instance.
+See the root [README](../README.md) for setup. The short version:
 
-First, set up the [Tutor Paragon Plugin](https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon), which will reproducibly compile and serve brands for you:
+- **With Tutor** — [`tutor-contrib-sample`](../tutor-contrib-sample/) configures the brand override from jsDelivr automatically.
+- **Without Tutor** — point your MFE at the published CSS via `env.config.js[x]` (see [Consuming the published brand](#consuming-the-published-brand) below).
+- **Hacking on the brand locally with Tutor** — see [Local brand development with Tutor](#local-brand-development-with-tutor) below.
+- **Hacking on the brand locally without Tutor** — these docs are coming soon.
 
-```bash
-# Install and enable the Tutor Paragon plugin.
-tutor plugins install https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon
-tutor plugins enable paragon
+## How it works
 
-# Build the paragon-builder image.
-# With this built, the 'tutor local do paragon-build-tokens' command becomes available.
-tutor images build paragon-builder
+The brand source is a small set of Paragon [design tokens](./tokens/src/themes/light/global/color.json). The npm `build` script (see [`package.json`](./package.json)) invokes Paragon's `build-tokens` and `build-scss` to compile `dist/light.min.css`, which consumer MFEs load as a Paragon `brandOverride` on top of the default light theme.
 
-# Ensure MFE container is running if it isn't already.
-# The MFE image will serve the CSS that you compile with paragon-build-tokens.
-tutor dev start -d lms cms mfe
-```
+## Consuming the published brand
 
-Every time you edit a theme, you will need to copy it into your tutor root and re-run paragon-build-tokens. You can do so by running the following from the root of the sample-plugin repository:
-
-```bash
-tutor_root="$(tutor config printroot)"
-[ -n "$tutor_root" ] \
-  && rm -rf "$tutor_root/env/plugins/paragon/theme-sources/themes" \
-  && cp -r brand-sample/tokens/src/themes "$tutor_root/env/plugins/paragon/theme-sources" \
-  && tutor local do paragon-build-tokens \
-  && echo 'Compiled design tokens :)' \
-  || echo 'Could not copy design token sources into tutor environment :('
-```
-
-Note: If you are having issues building the tokens, check the contents of the paragon plugin folder within your tutor root. It should look like this:
-
-```bash
-tree "$(tutor config printroot)/env/plugins/paragon"
- ├── [...]
- └── theme-sources
-     └── themes
-         └── light
-             └── global
-                 └── color.json
-```
-
-### Local brand dev without Tutor
-
-TODO write this section
-
-### jsdeliver + Tutor
-
-*tutor-contrib-sample ships with this approach, for your convenience.*
-
-This configures Tutor so that your frontend loads the brand-sample from the [`jsdelivr`](https://www.jsdelivr.com/) CDN. It assumes that the brand exists on GitHub. This does not support local brand development.
-
-Add this to a tutor plugin, and then enable the plugin and restart tutor:
-
-```py
-import json
-from tutor import hooks
-
-paragon_theme_urls = {
-    "variants": {
-        "light": {
-            "urls": {
-                "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css",
-                "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css"
-            }
-        }
-    }
-}
-
-fstring = f"""
-MFE_CONFIG["PARAGON_THEME_URLS"] = {json.dumps(paragon_theme_urls)}
-"""
-
-hooks.Filters.ENV_PATCHES.add_item(
-    (
-        "mfe-lms-common-settings",
-        fstring
-    )
-)
-```
-
-### jsdeliver without Tutor
-
-Within each MFE, configure its `env.config.js[x]` to install this theme:
+For an MFE configured via `env.config.js[x]`:
 
 ```js
 const config = {
@@ -113,8 +32,8 @@ const config = {
     variants: {
       light: {
         urls: {
-          "default": "https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css",
-          "brandOverride": "https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css"
+          default: 'https://cdn.jsdelivr.net/npm/@openedx/paragon@$paragonVersion/dist/light.min.css',
+          brandOverride: 'https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css',
         },
       },
     },
@@ -124,18 +43,52 @@ const config = {
 export default config;
 ```
 
-If you are running a frontend-base site, add to the `SiteConfig` object in your `site.config.ts[x]`:
+For a frontend-base site, set the equivalent in `site.config.tsx`:
 
 ```tsx
 const siteConfig: SiteConfig = {
-  [...]
+  // ...
   theme: {
     variants: {
       light: {
-        url: 'https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css
+        url: 'https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css',
       },
     },
   },
-  [...]
-}
+};
+```
+
+## Local brand development with Tutor
+
+Use [tutor-contrib-paragon](https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon) to recompile and serve the brand from your local checkout instead of jsDelivr.
+
+First, install the plugin and build its image:
+
+```bash
+tutor plugins install https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon
+tutor plugins enable paragon
+tutor images build paragon-builder
+tutor dev start -d lms cms mfe
+```
+
+After each edit to the theme sources, copy them into the Tutor root and rebuild. From the root of this repo:
+
+```bash
+tutor_root="$(tutor config printroot)"
+[ -n "$tutor_root" ] \
+  && rm -rf "$tutor_root/env/plugins/paragon/theme-sources/themes" \
+  && cp -r brand-sample/tokens/src/themes "$tutor_root/env/plugins/paragon/theme-sources" \
+  && tutor dev do paragon-build-tokens \
+  && echo 'Your design tokens are ready to be built :)' \
+  || echo 'Could not copy design token sources into tutor environment :('
+```
+
+If the build fails, check that `"$(tutor config printroot)/env/plugins/paragon"` looks like:
+
+```
+└── theme-sources
+    └── themes
+        └── light
+            └── global
+                └── color.json
 ```
