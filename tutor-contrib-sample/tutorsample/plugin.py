@@ -2,8 +2,11 @@
 Tutor plugin for the Open edX Sample Plugin.
 
 Installs the backend Django app (openedx-plugin-sample from PyPI) into LMS/CMS
-and configures the frontend MFE slot (from @openedx/plugin-sample on npm) in the
-learner-dashboard.
+and configures two frontend MFE slots (from @openedx/plugin-sample on npm):
+  - CourseList replaces the default course-list widget on the learner-dashboard
+    (Archive feature -- also renders the per-course rating display inline).
+  - RateThisContent slots below every unit in frontend-app-learning
+    (Rating feature -- where learners actually submit 1-5 star ratings).
 
 Requirements:
     tutor>=17.0.0
@@ -70,18 +73,19 @@ if _tutormfe_available:
         "RUN npm install @openedx/plugin-sample",
     ))
 
-    # Step 2: Import the CourseList component in the MFE env config so it is
-    # in scope when the plugin slot configuration is evaluated at runtime.
-    # The mfe-env-config-buildtime-imports patch injects import statements
-    # into the generated env.config.jsx file.
+    # Step 2: Import both top-level components in the MFE env config so they
+    # are in scope when each plugin slot configuration is evaluated at runtime.
+    # CourseCardRating is used internally by CourseList and does not need its
+    # own import.
     hooks.Filters.ENV_PATCHES.add_item((
         "mfe-env-config-buildtime-imports",
-        "import { CourseList } from '@openedx/plugin-sample';",
+        "import { CourseList, RateThisContent } from '@openedx/plugin-sample';",
     ))
 
-    # Step 3: Configure the course list plugin slot.
+    # Step 3a: Configure the course list plugin slot.
     # - Hide the default CourseList that ships with the learner-dashboard.
-    # - Insert our custom CourseList that adds archive/unarchive functionality.
+    # - Insert our custom CourseList that adds archive/unarchive functionality
+    #   and displays the per-course average rating inline on each card.
     #
     # Slot ID: org.openedx.frontend.learner_dashboard.course_list.v1
     # Props passed by the slot: courseListData (visibleList, numPages,
@@ -101,6 +105,27 @@ if _tutormfe_available:
             type: DIRECT_PLUGIN,
             priority: 50,
             RenderWidget: CourseList,
+          },
+        }""",
+    ))
+
+    # Step 3b: Insert the "Rate this content" widget below every unit in
+    # frontend-app-learning's sequence container.
+    #
+    # Slot ID: org.openedx.frontend.learning.sequence_container.v1
+    # @@TODO: confirm exact slot prop shape -- the component expects a usage
+    # key (see extractUsageKey in RateThisContent.jsx).
+    PLUGIN_SLOTS.add_item((
+        "learning",
+        "org.openedx.frontend.learning.sequence_container.v1",
+        """
+        {
+          op: PLUGIN_OPERATIONS.Insert,
+          widget: {
+            id: 'openedx_plugin_sample_rate_this_content',
+            type: DIRECT_PLUGIN,
+            priority: 50,
+            RenderWidget: RateThisContent,
           },
         }""",
     ))

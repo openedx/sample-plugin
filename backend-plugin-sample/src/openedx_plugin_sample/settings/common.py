@@ -96,34 +96,39 @@ def _configure_openedx_filters(settings):
     # Get existing filter configuration (may be from other plugins or platform)
     filters_config = getattr(settings, 'OPEN_EDX_FILTERS_CONFIG', {})
 
-    # Filter we want to register
+    # Both of our filter steps target the same Learner Home /init filter:
+    # one injects per-learner archive state (Archive feature), the other
+    # injects the per-course rating aggregate (Rating feature). They share
+    # the same hook, so register them together.
     filter_name = "org.openedx.learning.home.courserun.api.rendered.started.v1"
-    our_pipeline_step = "openedx_plugin_sample.pipeline.AddArchiveStatusToLearnerHomeCourseRun"
+    our_pipeline_steps = [
+        "openedx_plugin_sample.pipeline.AddArchiveStatusToLearnerHomeCourseRun",
+        "openedx_plugin_sample.pipeline.AddAverageRatingToLearnerHomeCourseRun",
+    ]
 
     # Check if this filter already has configuration
     if filter_name in filters_config:
-        logger.debug(f"Filter {filter_name} already configured, adding our pipeline step")
+        logger.debug(f"Filter {filter_name} already configured, adding our pipeline steps")
 
         # Get existing pipeline steps
         existing_pipeline = filters_config[filter_name].get("pipeline", [])
 
-        # Check if our pipeline step is already registered
-        if our_pipeline_step in existing_pipeline:
-            logger.info(
-                f"Pipeline step {our_pipeline_step} already registered for filter {filter_name}. "
-                "This may indicate the plugin is being loaded multiple times or another plugin "
-                "has registered the same pipeline step."
-            )
-        else:
-            # Add our pipeline step to existing configuration
-            existing_pipeline.append(our_pipeline_step)
-            filters_config[filter_name]["pipeline"] = existing_pipeline
-            logger.debug(f"Added {our_pipeline_step} to existing filter configuration")
+        for step in our_pipeline_steps:
+            if step in existing_pipeline:
+                logger.info(
+                    f"Pipeline step {step} already registered for filter {filter_name}. "
+                    "This may indicate the plugin is being loaded multiple times or another plugin "
+                    "has registered the same pipeline step."
+                )
+            else:
+                existing_pipeline.append(step)
+                logger.debug(f"Added {step} to existing filter configuration")
+        filters_config[filter_name]["pipeline"] = existing_pipeline
     else:
         # Create new filter configuration
         logger.debug(f"Creating new filter configuration for {filter_name}")
         filters_config[filter_name] = {
-            "pipeline": [our_pipeline_step],
+            "pipeline": list(our_pipeline_steps),
             "fail_silently": False,
         }
 

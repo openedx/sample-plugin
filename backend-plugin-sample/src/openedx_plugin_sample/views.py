@@ -9,13 +9,22 @@ from django_filters import rest_framework as django_filters
 from django_filters.rest_framework import DjangoFilterBackend
 from opaque_keys import InvalidKeyError
 from opaque_keys.edx.keys import CourseKey
-from rest_framework import filters, permissions, viewsets
+from rest_framework import filters, mixins, permissions, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.throttling import UserRateThrottle
 
-from openedx_plugin_sample.models import CourseArchiveStatus
-from openedx_plugin_sample.serializers import CourseArchiveStatusSerializer
+from openedx_plugin_sample.models import (
+    CourseArchiveStatus,
+    CourseAverageRating,
+    UnitRating,
+    apply_rating_delta,
+)
+from openedx_plugin_sample.serializers import (
+    CourseArchiveStatusSerializer,
+    CourseAverageRatingSerializer,
+    UnitRatingSerializer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -266,3 +275,125 @@ class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
 
         # Delete the instance
         return super().perform_destroy(instance)
+
+
+class UnitRatingPagination(PageNumberPagination):
+    """Pagination for UnitRating list/CourseAverageRating list."""
+
+    page_size = 20
+    page_size_query_param = "page_size"
+    max_page_size = 100
+
+
+class UnitRatingThrottle(UserRateThrottle):
+    """Throttle for the UnitRating API."""
+
+    rate = "60/minute"
+
+
+class UnitRatingFilterSet(django_filters.FilterSet):
+    """
+    Public filters map onto the user-friendly fields rather than FK PKs.
+    """
+
+    # ?course_id=course-v1:... -> course_run.course_key
+    course_id = django_filters.CharFilter(field_name="course_run__course_key")
+
+    ordering = django_filters.OrderingFilter(
+        fields=(
+            ("usage_key", "usage_key"),
+            ("stars", "stars"),
+            ("created_at", "created_at"),
+            ("updated_at", "updated_at"),
+        )
+    )
+
+    class Meta:
+        model = UnitRating
+        fields = ["usage_key", "course_id", "user", "stars"]
+
+
+class UnitRatingViewSet(viewsets.ModelViewSet):
+    """
+    Per-unit rating CRUD.
+
+    GET /unit-rating/?usage_key=<key>  -> the caller's rating for that unit
+    POST /unit-rating/                 -> create a new rating
+    PATCH /unit-rating/<id>/           -> update an existing rating
+    DELETE /unit-rating/<id>/          -> remove a rating
+
+    Regular users only see their own rows; staff/superusers see all.
+    """
+
+    serializer_class = UnitRatingSerializer
+    permission_classes = [IsOwnerOrStaffSuperuser]
+    pagination_class = UnitRatingPagination
+    throttle_classes = [UnitRatingThrottle]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
+    filterset_class = UnitRatingFilterSet
+    ordering = ["-updated_at"]
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = UnitRating.objects.select_related("user", "course_run")
+        if user.is_staff or user.is_superuser:
+            return qs
+        return qs.filter(user=user)
+
+    def perform_create(self, serializer):
+        # Block users from creating rows on behalf of other users.
+        if "user" in self.request.data:
+            requested_user_id = self.request.data["user"]
+            if requested_user_id != self.request.user.id and not (
+                self.request.user.is_staff or self.request.user.is_superuser
+            ):
+                raise PermissionDenied(
+                    "You do not have permission to create ratings for other users."
+                )
+        # The serializer's create() handles the aggregate update.
+        serializer.save()
+
+    def perform_update(self, serializer):
+        if "user" in self.request.data:
+            requested_user_id = self.request.data["user"]
+            if requested_user_id != self.request.user.id and not (
+                self.request.user.is_staff or self.request.user.is_superuser
+            ):
+                raise PermissionDenied(
+                    "You do not have permission to update ratings for other users."
+                )
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        # Decrement the cached aggregate before deleting the row.
+        apply_rating_delta(
+            instance.course_run,
+            old_stars=instance.stars,
+            new_stars=None,
+        )
+        super().perform_destroy(instance)
+
+
+class CourseAverageRatingViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    """
+    Read-only access to the cached per-course rating aggregate.
+
+    Mostly useful for debugging / admin. The frontend reads the same data off
+    the Learner Home /init response via the filter pipeline rather than calling
+    this endpoint directly.
+    """
+
+    serializer_class = CourseAverageRatingSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = UnitRatingPagination
+    queryset = CourseAverageRating.objects.select_related("course_run").all()
+    # Look up by course_key string rather than internal PK.
+    lookup_field = "course_run__course_key"
+    lookup_url_kwarg = "course_id"
+    # @@TODO: courseId strings contain ':' and '+' which trip up default DRF
+    # URL routing. Either set a custom regex on the route or expose an
+    # ``?course_id=`` filter instead.

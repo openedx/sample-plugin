@@ -42,7 +42,7 @@ import logging
 import crum
 from openedx_filters.filters import PipelineStep
 
-from .models import CourseArchiveStatus
+from .models import CourseArchiveStatus, CourseAverageRating
 
 logger = logging.getLogger(__name__)
 
@@ -87,5 +87,52 @@ class AddArchiveStatusToLearnerHomeCourseRun(PipelineStep):
             "serialized_courserun": {
                 **serialized_courserun,
                 "isArchivedByLearner": is_archived_by_learner,
+            },
+        }
+
+
+class AddAverageRatingToLearnerHomeCourseRun(PipelineStep):
+    """
+    Decorate each courseRun in the Learner Home /init response with the cached
+    average rating, so the Archive course-card display can render stars without
+    a second API call.
+
+    Filter name: ``org.openedx.learning.home.courserun.api.rendered.started.v1``
+    """
+
+    def run_filter(self, serialized_courserun, **kwargs):  # pylint: disable=arguments-differ
+        """
+        Args:
+            serialized_courserun (dict): One courseRun from the /init serializer.
+                Reads ``courseId``; passes all other fields through unchanged.
+
+        Returns:
+            dict: ``{"serialized_courserun": <updated dict>}`` with two new keys
+                added:
+                  - ``averageStars`` (float or None) -- None when no ratings exist
+                  - ``ratingCount`` (int)            -- 0 when no ratings exist
+        """
+        course_id = serialized_courserun.get("courseId")
+        if not course_id:
+            return {"serialized_courserun": serialized_courserun}
+
+        # @@TODO: looking up one row per courseRun is fine for a dashboard with a
+        # handful of courses but will N+1 on long course lists. A prefetch in
+        # the upstream serializer (or a bulk lookup here) would be the prod fix.
+        try:
+            avg = CourseAverageRating.objects.get(
+                course_run__course_key=course_id,
+            )
+            average_stars = avg.average_stars
+            rating_count = avg.rating_count
+        except CourseAverageRating.DoesNotExist:
+            average_stars = None
+            rating_count = 0
+
+        return {
+            "serialized_courserun": {
+                **serialized_courserun,
+                "averageStars": average_stars,
+                "ratingCount": rating_count,
             },
         }
