@@ -1,6 +1,6 @@
 # brand-sample
 
-**This is a simple example brand package that changes the `brand` color to purple.**
+**This is a simple example brand package that changes the `brand` colors to an autumn-inspired palette.**
 
 ### Before
 ![Screenshot of the Authn MFE with this brand package enabled](./docs/images/authn-without-theme.png)
