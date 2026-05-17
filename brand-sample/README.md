@@ -40,7 +40,7 @@ tutor images build paragon-builder
 tutor dev start -d lms cms mfe
 ```
 
-Every time you edit a theme, copy it into your tutor root and re-run paragon-build-tokens. You can do so by running the following from the root of the sample-plugin repository:
+Every time you edit a theme, you will need to copy it into your tutor root and re-run paragon-build-tokens. You can do so by running the following from the root of the sample-plugin repository:
 
 ```bash
 tutor_root="$(tutor config printroot)"
