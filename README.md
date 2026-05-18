@@ -1,243 +1,66 @@
 # Open edX Sample Plugin
 
-A comprehensive example demonstrating all major plugin interfaces available in the Open edX platform. This repository shows how to extend Open edX functionality without modifying core platform code.
+A worked example of every major Open edX plugin interface, built around a small "course archiving" feature you can run end-to-end. Use this repo as a reference when building your own Open edX plugin.
 
-## Table of Contents
+This is a monorepo of four sub-packages, each demonstrating one extension point:
 
-- [What This Repository Demonstrates](#what-this-repository-demonstrates)
-- [Plugin Types & Official Documentation](#plugin-types--official-documentation)
-- [Quick Start Guide](#quick-start-guide)
-- [Learning Path for New Plugin Developers](#learning-path-for-new-plugin-developers)
-- [Repository Structure](#repository-structure)
-- [Development Workflows](#development-workflows)
-- [Integration Examples](#integration-examples)
-- [Troubleshooting](#troubleshooting)
-- [Additional Resources](#additional-resources)
+| Sub-package | Plugin type | What it does |
+|---|---|---|
+| [`backend-plugin-sample/`](./backend-plugin-sample/) | [Django app plugin](https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html) | Adds a `CourseArchiveStatus` model with a REST API, an [Open edX Events](https://docs.openedx.org/projects/openedx-events/en/latest/) handler, and an [Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/) pipeline step |
+| [`frontend-plugin-sample/`](./frontend-plugin-sample/) | [MFE plugin slot widget](https://docs.openedx.org/en/latest/site_ops/how-tos/use-frontend-plugin-slots.html) | Replaces the learner-dashboard course list with one that lets learners archive courses |
+| [`brand-sample/`](./brand-sample/) | [Paragon brand package](https://github.com/openedx/paragon) | An autumn-inspired color palette |
+| [`tutor-contrib-sample/`](./tutor-contrib-sample/) | [Tutor plugin](https://docs.tutor.edly.io/) | Installs and wires up the three above for a Tutor-based deployment |
 
-## What This Repository Demonstrates
+## Development with Tutor
 
-This sample plugin showcases the **Open edX Hooks Extension Framework**, which allows you to extend the platform in a stable and maintainable way. The framework provides two main types of hooks:
+Requires [Tutor](https://docs.tutor.edly.io/install.html) >= 20 with [tutor-mfe](https://github.com/overhangio/tutor-mfe), and an Open edX environment that supports design tokens (Paragon >= 23, "Teak" release or later).
 
-- **Events**: React to things happening in the platform (e.g., when a course is published)
-- **Filters**: Modify platform behavior (e.g., change where course about pages redirect)
+### Running the demo as-is
 
-**Key Concept**: All extensions are implemented as standard Django plugins that integrate seamlessly with edx-platform.
-
-**Official Documentation**: [Hooks Extension Framework Overview](https://docs.openedx.org/en/latest/developers/concepts/hooks_extension_framework.html)
-
-## Plugin Types & Official Documentation
-
-| Plugin Type | What It Does | Official Documentation | Sample Code | When To Use |
-|-------------|--------------|------------------------|-------------|-------------|
-| **Django App Plugin** | Add models, APIs, views, and business logic | [How to create a plugin app](https://docs.openedx.org/projects/edx-django-utils/en/latest/plugins/how_tos/how_to_create_a_plugin_app.html) | [`backend-plugin-sample/`](./backend-plugin-sample/) | Adding new functionality, APIs, or data models |
-| **Events (Signals)** | React to platform events | [Open edX Events Guide](https://docs.openedx.org/projects/openedx-events/en/latest/) | [`backend-plugin-sample/openedx_plugin_sample/signals.py`](./backend-plugin-sample/openedx_plugin_sample/signals.py) | Integrating with external systems, audit logging |
-| **Filters** | Modify platform behavior | [Using Open edX Filters](https://docs.openedx.org/projects/openedx-filters/en/latest/how-tos/using-filters.html) | [`backend-plugin-sample/openedx_plugin_sample/pipeline.py`](./backend-plugin-sample/openedx_plugin_sample/pipeline.py) | Customizing business logic, URL redirects |
-| **Frontend Slots** | Customize MFE interfaces | [Frontend Plugin Slots](https://docs.openedx.org/en/latest/site_ops/how-tos/use-frontend-plugin-slots.html) | [`frontend-plugin-sample/`](./frontend-plugin-sample/) | UI customization, adding new components |
-| **Brand Packages** | Customize theming | [Open edX Brand Package Interface](https://github.com/openedx/brand-openedx) | [`brand-sample/`](./brand-sample/) | UI theming |
-| **Tutor Plugin** | Deploy plugins easily | [Tutor Plugin Development](https://docs.tutor.edly.io/) | [`tutor-contrib-sample/`](./tutor-contrib-sample/) | Simplified deployment and configuration |
-
-## Quick Start Guide
-
-### Prerequisites
-1. **Platform Setup**: Follow the [Open edX Development Setup](https://docs.openedx.org/en/latest/developers/how-tos/get-ready-for-python-dev.html)
-2. **Understanding**: Read the [Platform Overview](https://docs.openedx.org/en/latest/developers/concepts/platform_overview.html)
-
-### Option 1: Development with Tutor (Recommended)
+The `tutor-contrib-sample` plugin in this repo installs the published backend, frontend, and brand packages and wires them into Tutor:
 
 ```bash
-# Bind-mount backend source into Tutor image and containers.
-tutor mounts add "$PWD/backend-plugin-sample"
-
-# Rebuild image, run migrations, reboot containers:
-tutor dev launch  
-
-# Frontend Plugin Setup (for learner-dashboard MFE development)
-# Add env.config.jsx and module.config.js (see frontend-plugin-sample/README.md)
-# Then, install and run.
-cd path/to/frontend-app-learner-dashboard && npm ci && npm run dev
+pip install -e ./tutor-contrib-sample
+tutor plugins enable sample
+tutor dev launch
 ```
 
-### Option 2: Development without Tutor
+This is enough to see everything working: visit the learner dashboard and you should see the customized course list rendered with the brand applied. See [`tutor-contrib-sample/README.md`](./tutor-contrib-sample/README.md) for what each piece of the plugin does.
 
-```bash
-# In your edx-platform directory
-pip install -e /path/to/sample-plugin/backend-plugin-sample
+### Hacking on the source
 
-# Enable Learner Dashboard MFE
-# Go to http://localhost:18000/admin/waffle/flag/
-# Create flag: learner_home_mfe.enabled = Yes
+To edit code in this repo and have your changes apply inside Tutor:
 
-# Run migrations
-python manage.py lms migrate
-```
+- **Backend** — `tutor-contrib-sample` registers `backend-plugin-sample` as a mounted directory, so a single command before launch is enough:
 
-### Verification
+  ```bash
+  tutor mounts add "$PWD/backend-plugin-sample"
+  tutor dev launch
+  ```
 
-1. **Backend**: Visit `http://localhost:18000/sample-plugin/api/v1/course-archive-status/`
-2. **Frontend**: Check learner dashboard for archive/unarchive functionality
-3. **Events**: Check logs for course catalog change events
-4. **Filters**: Course about page URLs should redirect to example.com
+- **Frontend** — bind-mount a local MFE checkout into `tutor-mfe`, then point its webpack at your local `frontend-plugin-sample` checkout. See [`frontend-plugin-sample/README.md`](./frontend-plugin-sample/README.md).
 
-## Learning Path for New Plugin Developers
+- **Brand** — use [tutor-contrib-paragon](https://github.com/openedx/openedx-tutor-plugins/tree/main/plugins/tutor-contrib-paragon) to recompile and serve the brand from disk. See [`brand-sample/README.md`](./brand-sample/README.md).
 
-### 1. Understand the Architecture
-- **Start here**: [Hooks Extension Framework](https://docs.openedx.org/en/latest/developers/concepts/hooks_extension_framework.html)
-- **Deep dive**: [OEP-50: Hooks Extension Framework](https://docs.openedx.org/projects/openedx-proposals/en/latest/architectural-decisions/oep-0050-hooks-extension-framework.html)
+## Development without Tutor
 
-### 2. Choose Your Plugin Type
-Use the table above to identify which type of plugin matches your needs. You can combine multiple types in one plugin.
+This path assumes you already have edx-platform running locally (bare-metal or devstack-style venv) and at least one MFE checked out.
 
-### 3. Study the Sample Code
-- **Backend**: Start with [`backend-plugin-sample/openedx_plugin_sample/apps.py`](./backend-plugin-sample/openedx_plugin_sample/apps.py) to understand plugin registration
-- **Events**: Examine [`backend-plugin-sample/openedx_plugin_sample/signals.py`](./backend-plugin-sample/openedx_plugin_sample/signals.py) for event handling patterns
-- **Filters**: Review [`backend-plugin-sample/openedx_plugin_sample/pipeline.py`](./backend-plugin-sample/openedx_plugin_sample/pipeline.py) for behavior modification
-- **Frontend**: Explore [`frontend-plugin-sample/src/plugin.jsx`](./frontend-plugin-sample/src/plugin.jsx) for UI customization
+- **Backend** — install editable into the edx-platform Python environment and migrate:
 
-### 4. Run This Sample
-Follow the [Quick Start Guide](#quick-start-guide) to see everything working together.
+  ```bash
+  pip install -e ./backend-plugin-sample
+  python manage.py lms migrate openedx_plugin_sample
+  python manage.py cms migrate openedx_plugin_sample
+  ```
 
-### 5. Adapt for Your Use Case
-Each directory contains detailed README.md files with adaptation guidance.
+- **Frontend** — in your MFE checkout, add the `module.config.js` and `env.config.jsx` shown in [`frontend-plugin-sample/README.md`](./frontend-plugin-sample/README.md), then `npm ci && npm start`.
 
-## Repository Structure
+- **Brand** — set `PARAGON_THEME_URLS.variants.light.urls.brandOverride` in your MFE's `env.config.js[x]` (or `theme.variants.light.url` in a frontend-base `site.config.tsx`) to `https://cdn.jsdelivr.net/gh/openedx/sample-plugin@main/brand-sample/dist/light.min.css`. See [`brand-sample/README.md`](./brand-sample/README.md) for the full snippet.
 
-```
-sample-plugin/
-├── README.md                           # This file - overview and quick start
-├── backend-plugin-sample/
-│   ├── README.md                      # Backend plugin detailed guide
-│   ├── openedx_plugin_sample/
-│   │   ├── apps.py                    # Django plugin configuration
-│   │   ├── models.py                  # Database models example
-│   │   ├── views.py                   # REST API endpoints
-│   │   ├── signals.py                 # Event handlers (Open edX Events)
-│   │   ├── pipeline.py                # Filter implementations (Open edX Filters)
-│   │   ├── settings/                  # Plugin settings configuration
-│   │   └── urls.py                    # URL routing
-│   └── tests/                         # Comprehensive test examples
-├── frontend-plugin-sample/
-│   ├── README.md                      # Frontend plugin detailed guide
-│   ├── src/
-│   │   ├── plugin.jsx                 # React component for MFE slot
-│   │   └── index.jsx                  # Export configuration
-│   └── package.json                   # NPM package configuration
-└── tutor-contrib-sample/
-    ├── README.md                      # Tutor deployment guide
-    └── sample.py               # Tutor plugin configuration
-```
+  > TODO: a fully local brand-development flow without Tutor (recompile + serve from disk) is not yet documented.
 
-## Development Workflows
+## Getting help
 
-### Backend Plugin Development
-
-1. **Setup**: Follow backend setup in [Quick Start](#quick-start-guide)
-2. **Development**:
-   - Modify models in `models.py`
-   - Add API endpoints in `views.py`
-   - Implement event handlers in `signals.py`
-   - Create filters in `pipeline.py`
-3. **Testing**: `cd backend-plugin-sample && make test`
-4. **Quality**: `cd backend-plugin-sample && make quality`
-
-**Detailed Guide**: See [`backend-plugin-sample/README.md`](./backend-plugin-sample/README.md)
-
-### Frontend Plugin Development
-
-1. **Setup**: Follow frontend setup in [Quick Start](#quick-start-guide)
-2. **Development**:
-   - Modify React components in `frontend-plugin-sample/src/`
-   - Test with local MFE development server
-3. **Testing**: Integration testing with MFE
-
-**Detailed Guide**: See [`frontend-plugin-sample/README.md`](./frontend-plugin-sample/README.md)
-
-### Full-Stack Plugin Development
-
-This sample shows how backend and frontend plugins work together:
-
-- **Backend** provides API endpoints for course archive status
-- **Frontend** consumes these APIs to show archive/unarchive UI
-- **Events** log when course information changes
-- **Filters** modify course about page URLs
-
-## Integration Examples
-
-### Backend + Frontend Integration
-
-```python
-# backend-plugin-sample/openedx_plugin_sample/views.py - Provides API
-class CourseArchiveStatusViewSet(viewsets.ModelViewSet):
-    # API implementation
-```
-
-```jsx
-// frontend-plugin-sample/src/plugin.jsx - Consumes API
-const response = await client.get(
-  `${lmsBaseUrl}/sample-plugin/api/v1/course-archive-status/`
-);
-```
-
-### Events + Filters Working Together
-
-```python
-# Events: Log course changes
-@receiver(COURSE_CATALOG_INFO_CHANGED)
-def log_course_info_changed(signal, sender, catalog_info, **kwargs):
-    logging.info(f"{catalog_info.course_key} has been updated!")
-
-# Filters: Modify course about URLs
-class ChangeCourseAboutPageUrl(PipelineStep):
-    def run_filter(self, url, org, **kwargs):
-        # Custom URL logic
-```
-
-## Troubleshooting
-
-### Common Issues
-
-**Plugin not loading:**
-- Verify `pyproject.toml` entry points are correct
-- Check that plugin app is in INSTALLED_APPS (should be automatic)
-- Review Django app plugin configuration in `apps.py`
-
-**Events not firing:**
-- Confirm signal receivers are imported in `apps.py` ready() method
-- Check event is being sent by platform (some events only fire in specific contexts)
-- Verify event data structure matches your handler signature
-
-**Filters not working:**
-- Ensure filter is registered in Django settings
-- Check that filter step class inherits from `PipelineStep`
-- Verify `run_filter` method returns correct dictionary format
-
-**Frontend plugin not appearing:**
-- Check MFE slot configuration in `env.config.jsx`
-- Verify plugin is installed (`npm install`)
-- Ensure slot exists in target MFE (check MFE documentation)
-
-### Getting Help
-
-1. **Documentation**: Start with official docs linked in the [Plugin Types table](#plugin-types--official-documentation)
-2. **Community**: [Open edX Community Slack](https://openedx.org/slack)
-3. **Forums**: [Open edX Discuss Forums](https://discuss.openedx.org)
-4. **Issues**: Create issues in this repository for sample-specific problems
-
-## Additional Resources
-
-### Official Documentation
-- **Platform**: [Open edX Developer Documentation](https://docs.openedx.org/en/latest/developers/)
-- **Architecture**: [OEP-49: Django App Patterns](https://docs.openedx.org/projects/openedx-proposals/en/latest/best-practices/oep-0049-django-app-patterns.html)
-- **Events**: [Open edX Events Reference](https://docs.openedx.org/projects/openedx-events/en/latest/reference/events.html)
-- **Filters**: [Open edX Filters Reference](https://docs.openedx.org/projects/openedx-filters/en/latest/reference/filters.html)
-- **Frontend**: [Available Frontend Plugin Slots](https://docs.openedx.org/en/latest/site_ops/references/frontend-plugin-slots.html)
-
-### Community Resources
-- **Cookiecutter**: [Django App Template](https://github.com/openedx/cookiecutter-django-app) for creating new plugins
-- **Examples**: Other Open edX plugins in the [openedx organization](https://github.com/openedx)
-- **Best Practices**: [OEP Index](https://docs.openedx.org/projects/openedx-proposals/en/latest/) for architectural guidance
-
-### What This Sample Provides That Official Docs Don't
-- **Working Integration**: Complete example showing all plugin types working together
-- **Real Business Logic**: Realistic course archiving functionality vs. hello-world examples
-- **Development Workflow**: End-to-end development and testing process
-- **Troubleshooting**: Common plugin development issues and solutions
+- Open edX [community Slack](https://openedx.org/slack) and [discussion forums](https://discuss.openedx.org)
+- Issues with this sample specifically: [openedx/sample-plugin issues](https://github.com/openedx/sample-plugin/issues)
