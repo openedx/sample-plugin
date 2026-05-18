@@ -44,7 +44,7 @@ To edit code in this repo and have your changes apply inside Tutor:
 
 ## Development without Tutor
 
-Assumes you already have edx-platform running locally (bare-metal or devstack-style venv) and at least one MFE checked out.
+This path assumes you already have edx-platform running locally (bare-metal or devstack-style venv) and at least one MFE checked out.
 
 - **Backend** — install editable into the edx-platform Python environment and migrate:
 

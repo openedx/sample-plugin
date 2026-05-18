@@ -65,7 +65,7 @@ Then, from the MFE checkout:
 ```bash
 npm ci
 
-# With Tutor — redirect tutor-mfe at your local MFE devserver:
+# With Tutor — point tutor-mfe at your local MFE devserver:
 tutor mounts add .
 tutor dev reboot -d mfe
 npm run dev

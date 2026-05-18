@@ -79,8 +79,8 @@ tutor_root="$(tutor config printroot)"
   && rm -rf "$tutor_root/env/plugins/paragon/theme-sources/themes" \
   && cp -r brand-sample/tokens/src/themes "$tutor_root/env/plugins/paragon/theme-sources" \
   && tutor dev do paragon-build-tokens \
-  && echo 'Your design tokens are ready to be built :)' \
-  || echo 'Could not copy design token sources into tutor environment :('
+  && echo 'Your design tokens are built :)' \
+  || echo 'Something went wrong while copying or building your design tokens :('
 ```
 
 If the build fails, check that `"$(tutor config printroot)/env/plugins/paragon"` looks like:

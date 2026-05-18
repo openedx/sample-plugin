@@ -16,7 +16,7 @@ See the root [README](../README.md) for setup instructions. With Tutor, [`tutor-
 
 **Model.** [`models.py`](./src/openedx_plugin_sample/models.py) defines `CourseArchiveStatus(user, course_id, is_archived, archive_date)`, indexed for the lookups the API performs. Registered in Django admin via [`admin.py`](./src/openedx_plugin_sample/admin.py).
 
-**REST API.** [`views.py`](./src/openedx_plugin_sample/views.py) exposes the model as a DRF `ModelViewSet` at `/sample-plugin/api/v1/course-archive-status/`, with per-user permissions, throttling, and pagination. Serializer in [`serializers.py`](./src/openedx_plugin_sample/serializers.py); URLs in [`urls.py`](./src/openedx_plugin_sample/urls.py). Business logic (e.g. setting `archive_date` when `is_archived` flips true) lives in `perform_create`/`perform_update` rather than in the serializer.
+**REST API.** [`views.py`](./src/openedx_plugin_sample/views.py) exposes the model as a DRF `ModelViewSet` at `/sample-plugin/api/v1/course-archive-status/`, with per-user permissions, throttling, and pagination. Serializer in [`serializers.py`](./src/openedx_plugin_sample/serializers.py); URLs in [`urls.py`](./src/openedx_plugin_sample/urls.py). Business logic (e.g. setting `archive_date` when `is_archived` becomes true) lives in `perform_create`/`perform_update` rather than in the serializer.
 
 **Event handler.** [`signals.py`](./src/openedx_plugin_sample/signals.py) listens for `COURSE_ENROLLMENT_CHANGED` and unarchives a learner's course when they upgrade to the verified track. An event (not a filter) is the right shape here because we want a one-time nudge at the moment of upgrade — if the learner re-archives the course later, we respect that. A filter would re-impose the rule on every render.
 
