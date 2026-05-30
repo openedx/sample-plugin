@@ -27,7 +27,7 @@ jobs:
       # while the workflow was running, which prevents accidentally releasing un-evaluated
       # changes.
       - name: Setup | Checkout Repository on Release Branch
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.ref_name }}
 
@@ -38,7 +38,7 @@ jobs:
       - name: Action | Semantic Version Release
         id: release
         # Adjust tag with desired version if applicable.
-        uses: python-semantic-release/python-semantic-release@v10.5.3
+        uses: python-semantic-release/python-semantic-release@350c48fcb3ffcdfd2e0a235206bc2ecea6b69df0 # v10.5.3
         with:
           github_token: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
           git_committer_name: "github-actions"
@@ -47,7 +47,7 @@ jobs:
           directory: './backend-plugin-sample'
 
       - name: Publish | Upload to GitHub Release Assets
-        uses: python-semantic-release/publish-action@v10.5.3
+        uses: python-semantic-release/publish-action@310a9983a0ae878b29f3aac778d7c77c1db27378 # v10.5.3
         if: steps.release.outputs.released == 'true'
         with:
           github_token: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
@@ -55,7 +55,7 @@ jobs:
           directory: './backend-plugin-sample'
 
       - name: Upload | Backend Distribution Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: steps.release.outputs.released == 'true'
         with:
           name: backend-distribution-artifacts
@@ -72,7 +72,7 @@ jobs:
         working-directory: './tutor-contrib-sample'
 
       - name: Upload | Tutor Plugin Distribution Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: steps.release.outputs.released == 'true'
         with:
           name: tutor-distribution-artifacts
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: Setup | Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         id: artifact-download
         with:
           name: backend-distribution-artifacts
@@ -122,7 +122,7 @@ jobs:
 
     steps:
       - name: Setup | Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: tutor-distribution-artifacts
           path: tutor-contrib-sample/dist
@@ -144,12 +144,12 @@ jobs:
 
     steps:
       - name: Setup | Checkout Repository on Release Ref
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.sha }}
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
         with:
           node-version-file: './frontend-plugin-sample/.nvmrc'
 
