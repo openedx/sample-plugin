@@ -45,8 +45,8 @@ openedx_plugin_sample = "openedx_plugin_sample.apps:SamplePluginConfig"
 openedx_plugin_sample = "openedx_plugin_sample.apps:SamplePluginConfig"
 
 [project.urls]
-Homepage = "https://openedx.org/openedx/sample-plugin"
-Repository = "https://openedx.org/openedx/sample-plugin"
+Homepage = "https://github.com/openedx/sample-plugin"
+Repository = "https://github.com/openedx/sample-plugin"
 
 [dependency-groups]
 test-base = [
