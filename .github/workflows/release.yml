@@ -40,19 +40,37 @@ jobs:
         # Adjust tag with desired version if applicable.
         uses: python-semantic-release/python-semantic-release@39dd2052f2ce8282a5d932c31d58a2ca06d2550e # v10.6.1
         with:
-          github_token: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           git_committer_name: "github-actions"
           git_committer_email: "actions@users.noreply.github.com"
           changelog: "false"
           directory: './backend-plugin-sample'
+          # Commit, tag, push and build, but don't create the GitHub release.
+          # We create it ourselves in the next step so that the distributions
+          # are attached before the release is published. See that step for why.
+          vcs_release: "false"
 
-      - name: Publish | Upload to GitHub Release Assets
-        uses: python-semantic-release/publish-action@5a5718ce47b892ef699f2972dae122297771d641 # v10.6.1
+      # This repo has immutable releases enabled, which freezes a release's
+      # assets the moment it is published, so assets cannot be attached
+      # afterwards. `gh release create` handles this by creating the release as
+      # a draft, uploading the assets, and only then publishing it:
+      # https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases
+      - name: Publish | Create GitHub Release with Assets
         if: steps.release.outputs.released == 'true'
-        with:
-          github_token: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
-          tag: ${{ steps.release.outputs.tag }}
-          directory: './backend-plugin-sample'
+        env:
+          GH_TOKEN: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
+          # Reuse the release notes python-semantic-release generated for us.
+          RELEASE_NOTES: ${{ steps.release.outputs.release_notes }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          # Output the release notes to a file
+          printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/release_notes.md"
+          # Create a draft release
+          gh release create "$TAG" \
+            --verify-tag \
+            --title "$TAG" \
+            --notes-file "$RUNNER_TEMP/release_notes.md" \
+            backend-plugin-sample/dist/*
 
       - name: Upload | Backend Distribution Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
