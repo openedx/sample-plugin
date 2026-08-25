@@ -58,7 +58,7 @@ jobs:
       - name: Publish | Create GitHub Release with Assets
         if: steps.release.outputs.released == 'true'
         env:
-          GH_TOKEN: ${{ secrets.OPENEDX_SEMANTIC_RELEASE_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Reuse the release notes python-semantic-release generated for us.
           RELEASE_NOTES: ${{ steps.release.outputs.release_notes }}
           TAG: ${{ steps.release.outputs.tag }}
