@@ -50,10 +50,23 @@ jobs:
           # are attached before the release is published. See that step for why.
           vcs_release: "false"
 
+      # Built before the release is created so that its distributions can be
+      # attached as release assets too. See the release step for why that
+      # ordering matters.
+      - name: Build | Tutor Plugin
+        # The tutor plugin does not use python-semantic-release directly.
+        # Instead it shares the version determined by the backend's semantic
+        # release above, passed in via SETUPTOOLS_SCM_PRETEND_VERSION so that
+        # setuptools-scm picks it up at build time.
+        if: steps.release.outputs.released == 'true'
+        run: pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.release.outputs.version }} python -m build
+        working-directory: './tutor-contrib-sample'
+
       # This repo has immutable releases enabled, which freezes a release's
       # assets the moment it is published, so assets cannot be attached
-      # afterwards. `gh release create` handles this by creating the release as
-      # a draft, uploading the assets, and only then publishing it:
+      # afterwards. Everything we want on the release has to be built by now
+      # and passed to this one command, which creates the release as a draft,
+      # uploads the assets, and only then publishes it:
       # https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/immutable-releases
       - name: Publish | Create GitHub Release with Assets
         if: steps.release.outputs.released == 'true'
@@ -71,7 +84,8 @@ jobs:
             --verify-tag \
             --title "$TAG" \
             --notes-file "$RUNNER_TEMP/release_notes.md" \
-            backend-plugin-sample/dist/*
+            backend-plugin-sample/dist/* \
+            tutor-contrib-sample/dist/*
 
       - name: Upload | Backend Distribution Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -80,15 +94,6 @@ jobs:
           name: backend-distribution-artifacts
           path: backend-plugin-sample/dist
           if-no-files-found: error
-
-      - name: Build | Tutor Plugin
-        # The tutor plugin does not use python-semantic-release directly.
-        # Instead it shares the version determined by the backend's semantic
-        # release above, passed in via SETUPTOOLS_SCM_PRETEND_VERSION so that
-        # setuptools-scm picks it up at build time.
-        if: steps.release.outputs.released == 'true'
-        run: pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=${{ steps.release.outputs.version }} python -m build
-        working-directory: './tutor-contrib-sample'
 
       - name: Upload | Tutor Plugin Distribution Artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
