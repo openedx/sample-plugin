@@ -30,6 +30,11 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          # Every matrix job populates the uv cache with a different set of tox
+          # dependencies, so give each one its own cache key. Sharing a single
+          # key makes the jobs race to save it, and all but the winner warn.
+          cache-suffix: ${{ matrix.toxenv }}
 
       - name: Install CI dependencies
         run: uv sync --group ci
