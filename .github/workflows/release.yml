@@ -65,7 +65,8 @@ jobs:
         run: |
           # Output the release notes to a file
           printf '%s' "$RELEASE_NOTES" > "$RUNNER_TEMP/release_notes.md"
-          # Create a draft release
+          # Creates the release as a draft, uploads the assets, and then
+          # publishes it -- all within this one command.
           gh release create "$TAG" \
             --verify-tag \
             --title "$TAG" \
