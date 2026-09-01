@@ -8,8 +8,18 @@ jobs:
   run_backend_tests:
     uses: ./.github/workflows/backend-ci.yml
 
+  run_frontend_tests:
+    uses: ./.github/workflows/frontend-ci.yml
+
+  run_tutor_tests:
+    uses: ./.github/workflows/tutor-ci.yml
+
   release:
-    needs: run_backend_tests
+    # Every package this workflow publishes has to build before we tag
+    # anything. The GitHub release and the PyPI uploads cannot be taken back,
+    # so a package that only fails to build in its publish job would leave the
+    # release half-finished.
+    needs: [run_backend_tests, run_frontend_tests, run_tutor_tests]
     runs-on: ubuntu-latest
     if: github.ref_name == 'main'
     concurrency:
