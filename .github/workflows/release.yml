@@ -186,7 +186,7 @@ jobs:
       - name: Update the package version and publish
         run: |
           npm ci
-          npm version ${{ needs.release.outputs.version }}
+          npm version --no-git-tag-version ${{ needs.release.outputs.version }}
           npm run build
           npm publish
         working-directory: './frontend-plugin-sample'
