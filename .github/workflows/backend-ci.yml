@@ -8,6 +8,14 @@ on:
   # run CI before doing whatever task they're doing.  Like the release workflow.
   workflow_call:
 
+concurrency:
+  # On a pull request, group by the PR so a new push supersedes the matrix
+  # still running for the previous one. Any other event -- notably the
+  # workflow_call from the release -- keys the group on the unique run id
+  # instead, so release runs never queue behind or cancel each other.
+  group: ${{ github.workflow }}-backend-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 defaults:
   run:
     working-directory: "./backend-plugin-sample"
