@@ -132,8 +132,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: backend-plugin-sample/dist
-          user: __token__
-          password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
 
   publish_tutor_plugin_to_pypi:
     runs-on: ubuntu-latest
@@ -155,8 +153,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           packages-dir: tutor-contrib-sample/dist
-          user: __token__
-          password: ${{ secrets.PYPI_UPLOAD_TOKEN }}
 
   publish_to_npm:
     runs-on: ubuntu-latest
