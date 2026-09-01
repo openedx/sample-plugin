@@ -1,0 +1,48 @@
+name: Frontend CI
+
+on:
+  pull_request:
+    branches:
+      - "**"
+  # So the release workflow can run these checks before it publishes anything.
+  workflow_call:
+
+concurrency:
+  # See backend-ci.yml for why non-pull_request events key on the run id.
+  group: ${{ github.workflow }}-frontend-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+defaults:
+  run:
+    working-directory: "./frontend-plugin-sample"
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: './frontend-plugin-sample/.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: './frontend-plugin-sample/package-lock.json'
+
+      # `npm ci` rather than `npm install`: it installs the lockfile exactly
+      # and fails if the lockfile and package.json have drifted apart, instead
+      # of quietly reconciling them.
+      - name: Install dependencies
+        run: npm ci
+
+      # The package has no lint or test suite yet, so compiling is the only
+      # check available. It is still the one that matters most: until now the
+      # first and only build of this package happened inside the publish job,
+      # after the GitHub release and both PyPI uploads had already gone out.
+      - name: Build
+        run: npm run build
