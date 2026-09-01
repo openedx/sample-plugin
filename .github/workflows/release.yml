@@ -185,7 +185,7 @@ jobs:
 
       - name: Update the package version and publish
         run: |
-          npm install --include=dev
+          npm ci
           npm version ${{ needs.release.outputs.version }}
           npm run build
           npm publish
