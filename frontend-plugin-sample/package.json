@@ -3,7 +3,11 @@
   "version": "__semantically__released__",
   "main": "dist/index.js",
   "files": ["dist"],
-  "repository": "https://github.com/openedx/sample-plugin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/openedx/sample-plugin.git",
+    "directory": "frontend-plugin-sample"
+  },
   "scripts": {
     "build": "fedx-scripts babel src --out-dir dist --source-maps --ignore **/*.test.jsx,**/*.test.js"
   },
