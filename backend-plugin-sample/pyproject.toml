@@ -84,8 +84,8 @@ django60 = [
 quality = [
     {include-group = "test"},
     # A real floor, not a placeholder: `edx_lint write_uv_constraints`, used by
-    # `make upgrade` and `make check-constraints`, does not exist before 6.0.
-    "edx-lint>=6.0",
+    # `make upgrade` and `make check-constraints`, was added in 6.2.0.
+    "edx-lint>=6.2",
     "isort>=0",
     "pycodestyle>=0",
     "pydocstyle>=0",
@@ -185,6 +185,9 @@ conflicts = [
 constraint-dependencies = [
     "Django<7.0",
     "elasticsearch<7.14.0",
+    "social-auth-app-django<6.0.0",
+    "social-auth-core<5.0.0",
+    "pip<26.2.1",
 ]
 
 [tool.edx_lint]
