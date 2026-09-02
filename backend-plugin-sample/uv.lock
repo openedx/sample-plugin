@@ -1350,8 +1350,10 @@ source = { editable = "." }
 dependencies = [
     { name = "django", version = "5.2.13", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'group-21-openedx-plugin-sample-dev' or extra != 'group-21-openedx-plugin-sample-django60' or (extra == 'group-21-openedx-plugin-sample-django60' and extra == 'group-21-openedx-plugin-sample-doc') or (extra == 'group-21-openedx-plugin-sample-django60' and extra == 'group-21-openedx-plugin-sample-quality') or (extra == 'group-21-openedx-plugin-sample-django60' and extra == 'group-21-openedx-plugin-sample-test')" },
     { name = "django", version = "6.0.4", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'group-21-openedx-plugin-sample-django60'" },
+    { name = "django-crum" },
     { name = "django-filter" },
     { name = "djangorestframework" },
+    { name = "edx-django-utils" },
     { name = "edx-opaque-keys" },
     { name = "openedx-atlas" },
     { name = "openedx-core" },
@@ -1432,8 +1434,10 @@ test-base = [
 [package.metadata]
 requires-dist = [
     { name = "django" },
+    { name = "django-crum" },
     { name = "django-filter" },
     { name = "djangorestframework" },
+    { name = "edx-django-utils" },
     { name = "edx-opaque-keys" },
     { name = "openedx-atlas" },
     { name = "openedx-core" },
