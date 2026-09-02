@@ -38,8 +38,20 @@ This is a **sample plugin repository** that demonstrates all major Open edX plug
 - Backend testing: `cd backend-plugin-sample && pytest` or `cd backend-plugin-sample && make test`
 - Run a single test: `cd backend-plugin-sample && pytest tests/test_models.py::test_placeholder`
 - Quality checks: `cd backend-plugin-sample && make quality`
-- Install requirements: `cd backend-plugin-sample && make requirements`
-- Compile requirements: `cd backend-plugin-sample && make compile-requirements`
+
+Python dependencies are managed with `uv` and locked in
+`backend-plugin-sample/uv.lock`. There is no `requirements/` directory.
+
+- Install the dev environment: `cd backend-plugin-sample && make requirements` (`uv sync --group dev`)
+- Relock without upgrading: `cd backend-plugin-sample && make compile-requirements` (`uv lock`)
+- Upgrade everything and resync the edx-lint constraints: `cd backend-plugin-sample && make upgrade`
+
+Routine dependency bumps are handled by Renovate, one pull request per
+package, so `make upgrade` is only needed for a deliberate full re-resolve.
+All three package managers enforce a 7-day minimum release age: see
+`exclude-newer` in `backend-plugin-sample/pyproject.toml`, `min-release-age`
+in the two `.npmrc` files, and `minimumReleaseAge` in `renovate.json5`. Those
+values have to stay in agreement.
 
 ## Code Style Guidelines
 - Python: Follow PEP 8 with max line length of 120
