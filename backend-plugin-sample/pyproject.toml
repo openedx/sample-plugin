@@ -28,17 +28,25 @@ keywords = [
 
 dynamic = ["readme", "version"]
 
+# Unconstrained on purpose. The Open edX platform pins these itself, and a
+# plugin that narrows them causes resolution conflicts when it is installed
+# into edx-platform. `>=0` rather than a bare name because Renovate skips any
+# dependency with no version specifier at all, so bare names would never get
+# update PRs. It is the PEP 440 equivalent of the "*" ranges in
+# frontend-plugin-sample/package.json -- PEP 440 has no bare wildcard.
+# Please don't "tidy" these into real floors without a reason to; a floor we
+# cannot justify is a compatibility claim we cannot back up.
 dependencies = [
-    "Django",
-    "djangorestframework",
-    "django-filter",
-    "edx-opaque-keys",
-    "openedx-core",
-    "openedx-events",
-    "openedx-filters",
-    "openedx-atlas",
-    "edx-django-utils",
-    "django-crum",
+    "Django>=0",
+    "djangorestframework>=0",
+    "django-filter>=0",
+    "edx-opaque-keys>=0",
+    "openedx-core>=0",
+    "openedx-events>=0",
+    "openedx-filters>=0",
+    "openedx-atlas>=0",
+    "edx-django-utils>=0",
+    "django-crum>=0",
 ]
 
 [project.entry-points."lms.djangoapp"]
@@ -52,12 +60,15 @@ Homepage = "https://github.com/openedx/sample-plugin"
 Repository = "https://github.com/openedx/sample-plugin"
 
 [dependency-groups]
+# `>=0` here for the same reason as [project].dependencies above: Renovate
+# skips dependencies with no version specifier. The two Django entries below
+# are the real exception -- they define the test matrix.
 test-base = [
-    "pytest-cov",
-    "pytest-django",
-    "code-annotations",
-    "edx-django-utils",
-    "django-extensions",
+    "pytest-cov>=0",
+    "pytest-django>=0",
+    "code-annotations>=0",
+    "edx-django-utils>=0",
+    "django-extensions>=0",
 ]
 # Current default Django version used by quality, docs, and the default test
 # matrix entry. When adding or retiring a Django version from the matrix, see
@@ -72,28 +83,30 @@ django60 = [
 ]
 quality = [
     {include-group = "test"},
-    "edx-lint",
-    "isort",
-    "pycodestyle",
-    "pydocstyle",
+    # A real floor, not a placeholder: `edx_lint write_uv_constraints`, used by
+    # `make upgrade` and `make check-constraints`, does not exist before 6.0.
+    "edx-lint>=6.0",
+    "isort>=0",
+    "pycodestyle>=0",
+    "pydocstyle>=0",
 ]
 doc = [
     {include-group = "test"},
-    "doc8",
-    "sphinx-book-theme",
-    "twine",
-    "build",
-    "Sphinx",
+    "doc8>=0",
+    "sphinx-book-theme>=0",
+    "twine>=0",
+    "build>=0",
+    "Sphinx>=0",
 ]
 ci = [
-    "tox",
-    "tox-uv",
+    "tox>=0",
+    "tox-uv>=0",
 ]
 dev = [
     {include-group = "quality"},
     {include-group = "ci"},
-    "diff-cover",
-    "edx-i18n-tools",
+    "diff-cover>=0",
+    "edx-i18n-tools>=0",
 ]
 
 [tool.setuptools]
