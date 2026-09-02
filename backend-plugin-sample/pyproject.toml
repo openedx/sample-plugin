@@ -145,6 +145,31 @@ local_scheme = 'no-local-version'
 fallback_version = "0.0.0.dev0"
 
 [tool.uv]
+# Supply-chain cooling-off period: never resolve to a release younger than
+# this. A hijacked release is usually yanked within a few days, so waiting is
+# cheap insurance for a repo where nothing is urgent.
+#
+# uv records the window in uv.lock as `[options] exclude-newer-span = "P7D"`
+# and re-evaluates it at resolve time. A widening window cannot invalidate the
+# lock -- exclude-newer only restricts which candidates are eligible, it never
+# forces an upgrade -- so `uv lock --check` and `uv sync --locked` keep passing
+# as time goes by. Raising the number of days here can invalidate it, though,
+# if the new cutoff excludes something already locked.
+#
+# This is the real enforcement point, not Renovate: Renovate cannot apply its
+# own `minimumReleaseAge` to a lockfile refresh, because it delegates that to
+# uv and never sees the individual releases. Setting it here also means a
+# developer running `make upgrade` locally gets the same behaviour as the bot.
+#
+# *** Keep this in sync with `minimumReleaseAge` in ../renovate.json5 and with
+# *** `min-release-age` in the .npmrc files. If uv is stricter than Renovate,
+# *** Renovate proposes versions uv then refuses and churns empty branches.
+#
+# To let one urgent security fix through without dropping the window for
+# everything, add a temporary exemption rather than changing this value:
+#     exclude-newer-package = { the-package = false }
+exclude-newer = "7 days"
+
 # Each entry lists groups with mutually exclusive version requirements so uv can
 # produce a single uv.lock that contains a separate resolution for each. Add a
 # new pair here whenever you add a legacy-version group to [dependency-groups].
@@ -166,6 +191,12 @@ constraint-dependencies = [
 # Repo-specific uv constraints merged with edx-lint's global constraints.
 # Local entries override global ones for the same package.
 # Run `make upgrade` to regenerate [tool.uv].constraint-dependencies.
+#
+# Any cap added here also needs a matching rule in ../renovate.json5, either
+# `enabled: false` or an `allowedVersions` for that package. Otherwise
+# Renovate offers a version the constraint forbids, `uv lock` refuses it, and
+# the branch lands with no changes -- retried on every run. See the Django
+# rule there for the worked example.
 uv_constraints = [
     "Django<7.0",  # this repo tests against Django 6.x; overrides the global Django<6.0 constraint
 ]
