@@ -72,7 +72,7 @@ test-base = [
 ]
 # Current default Django version used by quality, docs, and the default test
 # matrix entry. When adding or retiring a Django version from the matrix, see
-# docs/how-tos/adding-a-matrix-dependency.rst for the full process.
+# https://docs.openedx.org/en/latest/developers/how-tos/manage-uv-dependency-matrix.html
 test = [
     {include-group = "test-base"},
     "Django>=5.0,<6.0",
@@ -173,7 +173,7 @@ exclude-newer = "7 days"
 # Each entry lists groups with mutually exclusive version requirements so uv can
 # produce a single uv.lock that contains a separate resolution for each. Add a
 # new pair here whenever you add a legacy-version group to [dependency-groups].
-# See docs/how-tos/adding-a-matrix-dependency.rst for the full process.
+# See https://docs.openedx.org/en/latest/developers/how-tos/manage-uv-dependency-matrix.html
 conflicts = [
     [{group = "test"}, {group = "django60"}],
 ]

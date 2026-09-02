@@ -60,10 +60,6 @@ docs/modules.rst
 docs/sample_plugin.rst
 docs/sample_plugin.*.rst
 
-# Private requirements
-requirements/private.in
-requirements/private.txt
-
 # Test cruft
 default.db
 pii_report
