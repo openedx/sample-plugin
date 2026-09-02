@@ -10,6 +10,16 @@ sphinx:
   configuration: docs/conf.py
   fail_on_warning: true
 
+# Note: this configuration is currently dormant. Read the Docs looks for
+# .readthedocs.yaml in the repository root, and this file is a directory down,
+# so it is not read unless a project is created and pointed at this path
+# explicitly. No such project exists today. The docs are built and
+# warning-checked on every pull request by `tox -e docs` instead.
+#
+# It is kept, and kept correct, so that enabling hosted docs later is a matter
+# of creating the project rather than rewriting this file. Every path here is
+# relative to backend-plugin-sample/, not the repository root.
+
 # Set the version of python needed to build these docs.
 build:
   os: "ubuntu-22.04"
@@ -18,10 +28,11 @@ build:
 
 python:
   install:
-    - requirements: requirements/doc.txt
-
-    # This will pip install this repo into the python environment
-    # if you are using this in a repo that is not pip installable
-    # then you should remove the following two lines.
-    - method: pip
-      path: .
+    # `uv sync` against the committed uv.lock, so the docs build against the
+    # same pinned versions as CI -- and inherits the minimum release age
+    # recorded in the lock. This used to be `requirements: requirements/doc.txt`,
+    # which stopped existing when the repo moved to uv.lock.
+    - method: uv
+      command: sync
+      groups:
+        - doc
