@@ -1,6 +1,7 @@
 .PHONY: clean clean_tox compile_translations coverage diff_cover docs dummy_translations \
         extract_translations fake_translations help pii_check pull_translations \
-        quality requirements selfcheck test test-all upgrade compile-requirements validate install_transifex_client
+        quality requirements selfcheck test test-all upgrade compile-requirements validate install_transifex_client \
+        check-constraints
 
 .DEFAULT_GOAL := help
 
@@ -35,9 +36,29 @@ docs: ## generate Sphinx HTML documentation, including API docs
 compile-requirements: ## generate the uv.lock file without upgrading packages
 	uv lock
 
+# Renovate handles routine dependency bumps now, one pull request per package.
+# This target remains the way to re-resolve everything at once, and the only
+# thing that regenerates [tool.uv].constraint-dependencies from edx-lint.
 upgrade: ## upgrade all packages in uv.lock and sync constraints from edx-lint
-	uv run --with edx-lint edx_lint write_uv_constraints pyproject.toml
+	uv run --with 'edx-lint>=6.2' edx_lint write_uv_constraints pyproject.toml
 	uv lock --upgrade
+
+# Regenerates the constraints into a scratch copy and diffs, rather than
+# checking `git diff`, so that it reports only this drift and not whatever else
+# happens to be uncommitted in the working tree.
+check-constraints: ## fail if [tool.uv].constraint-dependencies is out of date
+	@cp pyproject.toml pyproject.toml.orig
+	@uv run --with 'edx-lint>=6.2' edx_lint write_uv_constraints pyproject.toml >/dev/null
+	@if cmp -s pyproject.toml.orig pyproject.toml; then \
+	  rm -f pyproject.toml.orig; \
+	else \
+	  diff -u pyproject.toml.orig pyproject.toml || true; \
+	  mv pyproject.toml.orig pyproject.toml; \
+	  echo ""; \
+	  echo "[tool.uv].constraint-dependencies is out of date with edx-lint."; \
+	  echo "Run 'make upgrade' and commit the result."; \
+	  exit 1; \
+	fi
 
 quality: ## check coding style with pycodestyle and pylint
 	tox -e quality
