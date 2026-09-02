@@ -69,7 +69,7 @@ jobs:
       # that has to learn about it.
       - name: Check that every job succeeded
         run: |
-          results='${{ join(needs.*.result, " ") }}'
+          results='${{ join(needs.*.result, ' ') }}'
           echo "Job results: $results"
           for result in $results; do
             if [ "$result" != "success" ]; then
