@@ -1,7 +1,7 @@
 name: Brand CI
 
 on:
-  # Invoked by ci.yml, which aggregates every check into a single `gate` job.
+  # Invoked by ci.yml, which aggregates every check into a single required one.
   workflow_call:
 
 concurrency:
@@ -15,7 +15,7 @@ defaults:
 
 jobs:
   build:
-    name: brand build
+    name: build
     runs-on: ubuntu-latest
 
     permissions:
