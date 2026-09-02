@@ -37,6 +37,8 @@ dependencies = [
     "openedx-events",
     "openedx-filters",
     "openedx-atlas",
+    "edx-django-utils",
+    "django-crum",
 ]
 
 [project.entry-points."lms.djangoapp"]
