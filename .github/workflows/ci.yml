@@ -1,0 +1,80 @@
+name: CI
+
+# Every check that runs on a pull request, aggregated behind a single `gate`
+# job.
+#
+# The point of the aggregation is branch protection. GitHub's required status
+# checks are matched by name, so requiring the individual jobs means the
+# required list has to spell out every matrix leg -- `tests (ubuntu-latest,
+# 3.12, django52)` and friends -- and adding or retiring a Python or Django
+# version silently breaks protection until somebody remembers to update the
+# repository settings. Worse, two of the per-package jobs were both called
+# `build`, so they could not be told apart in that list at all.
+#
+# `gate` succeeds only when every job it depends on succeeded, so `gate` is
+# the only name that has to be required. It never changes, whatever happens to
+# the matrix.
+#
+# This matters for automerge specifically: GitHub's auto-merge waits for
+# *required* checks and nothing else, so a check that runs but is not required
+# cannot hold a merge back.
+
+on:
+  pull_request:
+    branches:
+      - "**"
+  # So the release workflow can run every check before it publishes anything.
+  workflow_call:
+
+concurrency:
+  # See backend-ci.yml for why non-pull_request events key on the run id.
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    uses: ./.github/workflows/backend-ci.yml
+
+  frontend:
+    uses: ./.github/workflows/frontend-ci.yml
+
+  tutor:
+    uses: ./.github/workflows/tutor-ci.yml
+
+  brand:
+    uses: ./.github/workflows/brand-ci.yml
+
+  gate:
+    name: gate
+    # `always()` so the gate still reports when something upstream fails.
+    # Without it the gate would be skipped, and a skipped required check never
+    # reports at all, which blocks the pull request forever instead of failing
+    # it.
+    if: always()
+    needs: [backend, frontend, tutor, brand]
+    runs-on: ubuntu-latest
+
+    steps:
+      # Deliberately not using a third-party aggregation action. This job is
+      # the one thing standing between a pull request and `main`, so it is the
+      # last place worth adding a dependency -- and the logic is five lines.
+      #
+      # Every result must be `success`. Anything else fails the gate,
+      # `skipped` included: no job here is conditional, so a skip means
+      # something went wrong rather than something was legitimately not
+      # needed. If a genuinely optional job is added later, this is the place
+      # that has to learn about it.
+      - name: Check that every job succeeded
+        run: |
+          results='${{ join(needs.*.result, ' ') }}'
+          echo "Job results: $results"
+          for result in $results; do
+            if [ "$result" != "success" ]; then
+              echo "::error::A required job reported '$result'."
+              exit 1
+            fi
+          done
+          echo "All jobs succeeded."

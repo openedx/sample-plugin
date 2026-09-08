@@ -1,10 +1,7 @@
 name: Frontend CI
 
 on:
-  pull_request:
-    branches:
-      - "**"
-  # So the release workflow can run these checks before it publishes anything.
+  # Invoked by ci.yml, which aggregates every check into a single `gate` job.
   workflow_call:
 
 concurrency:

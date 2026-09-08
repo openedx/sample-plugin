@@ -1,11 +1,8 @@
 name: Python CI
 
 on:
-  pull_request:
-    branches:
-      - "**"
-  # This is so we can call CI locally from other workflows that might want to
-  # run CI before doing whatever task they're doing.  Like the release workflow.
+  # Invoked by ci.yml, which runs on pull requests and aggregates every check
+  # into a single `gate` job, and by release.yml before it publishes anything.
   workflow_call:
 
 concurrency:

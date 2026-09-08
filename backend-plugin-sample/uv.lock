@@ -15,10 +15,17 @@ conflicts = [[
     { package = "openedx-plugin-sample", group = "django60" },
 ]]
 
+[options]
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer-span = "P7D"
+
 [manifest]
 constraints = [
     { name = "django", specifier = "<7.0" },
     { name = "elasticsearch", specifier = "<7.14.0" },
+    { name = "pip", specifier = "<26.2.1" },
+    { name = "social-auth-app-django", specifier = "<6.0.0" },
+    { name = "social-auth-core", specifier = "<5.0.0" },
 ]
 
 [[package]]
@@ -819,7 +826,7 @@ wheels = [
 
 [[package]]
 name = "edx-lint"
-version = "6.0.0"
+version = "6.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "click" },
@@ -829,10 +836,11 @@ dependencies = [
     { name = "pylint-celery" },
     { name = "pylint-django" },
     { name = "six" },
+    { name = "tomlkit" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7a/b5/43614ee28105f436b5664fa0ead2ed6f74c125b732e030b7ceaa7f3e953f/edx_lint-6.0.0.tar.gz", hash = "sha256:078e6f3a5d54f295a43c6db59f7fdc373e139aa1bda8b7ce02fb53e15296675b", size = 48460, upload-time = "2026-03-12T18:00:53.047Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/da/e2/20b4782eba5bbbaeb949877666f871912db05fb22cee2eafdbc83566cffc/edx_lint-6.2.0.tar.gz", hash = "sha256:2ce94b0b1235024e7714792442ea674e1bbe2877e7ca2ca970609e74aa73dfdf", size = 55456, upload-time = "2026-08-18T12:40:35.178Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/fd/f3fbb21bb2ac75dbacbbd8a9afbffc093b09d51128ec80def128761b19b4/edx_lint-6.0.0-py3-none-any.whl", hash = "sha256:5eab30bf1beb6f678b973151b9c0add0efbd758ef33f3df52e687dc48b2c0024", size = 56807, upload-time = "2026-03-12T18:00:51.866Z" },
+    { url = "https://files.pythonhosted.org/packages/cf/f3/72bbb973cb654aa9d8291c438dd02b21ffb3bf2bdc9e653f9ea9048e3b20/edx_lint-6.2.0-py3-none-any.whl", hash = "sha256:0e1491f9a049927e35eb05a0fd33464b4ec912b83e387568e37f4ce5d10acb30", size = 64109, upload-time = "2026-08-18T12:40:34.102Z" },
 ]
 
 [[package]]
@@ -1350,8 +1358,10 @@ source = { editable = "." }
 dependencies = [
     { name = "django", version = "5.2.13", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'group-21-openedx-plugin-sample-dev' or extra != 'group-21-openedx-plugin-sample-django60' or (extra == 'group-21-openedx-plugin-sample-django60' and extra == 'group-21-openedx-plugin-sample-doc') or (extra == 'group-21-openedx-plugin-sample-django60' and extra == 'group-21-openedx-plugin-sample-quality') or (extra == 'group-21-openedx-plugin-sample-django60' and extra == 'group-21-openedx-plugin-sample-test')" },
     { name = "django", version = "6.0.4", source = { registry = "https://pypi.org/simple" }, marker = "extra == 'group-21-openedx-plugin-sample-django60'" },
+    { name = "django-crum" },
     { name = "django-filter" },
     { name = "djangorestframework" },
+    { name = "edx-django-utils" },
     { name = "edx-opaque-keys" },
     { name = "openedx-atlas" },
     { name = "openedx-core" },
@@ -1431,84 +1441,86 @@ test-base = [
 
 [package.metadata]
 requires-dist = [
-    { name = "django" },
-    { name = "django-filter" },
-    { name = "djangorestframework" },
-    { name = "edx-opaque-keys" },
-    { name = "openedx-atlas" },
-    { name = "openedx-core" },
-    { name = "openedx-events" },
-    { name = "openedx-filters" },
+    { name = "django", specifier = ">=0" },
+    { name = "django-crum", specifier = ">=0" },
+    { name = "django-filter", specifier = ">=0" },
+    { name = "djangorestframework", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "edx-opaque-keys", specifier = ">=0" },
+    { name = "openedx-atlas", specifier = ">=0" },
+    { name = "openedx-core", specifier = ">=0" },
+    { name = "openedx-events", specifier = ">=0" },
+    { name = "openedx-filters", specifier = ">=0" },
 ]
 
 [package.metadata.requires-dev]
 ci = [
-    { name = "tox" },
-    { name = "tox-uv" },
+    { name = "tox", specifier = ">=0" },
+    { name = "tox-uv", specifier = ">=0" },
 ]
 dev = [
-    { name = "code-annotations" },
-    { name = "diff-cover" },
+    { name = "code-annotations", specifier = ">=0" },
+    { name = "diff-cover", specifier = ">=0" },
     { name = "django", specifier = ">=5.0,<6.0" },
-    { name = "django-extensions" },
-    { name = "edx-django-utils" },
-    { name = "edx-i18n-tools" },
-    { name = "edx-lint" },
-    { name = "isort" },
-    { name = "pycodestyle" },
-    { name = "pydocstyle" },
-    { name = "pytest-cov" },
-    { name = "pytest-django" },
-    { name = "tox" },
-    { name = "tox-uv" },
+    { name = "django-extensions", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "edx-i18n-tools", specifier = ">=0" },
+    { name = "edx-lint", specifier = ">=6.2" },
+    { name = "isort", specifier = ">=0" },
+    { name = "pycodestyle", specifier = ">=0" },
+    { name = "pydocstyle", specifier = ">=0" },
+    { name = "pytest-cov", specifier = ">=0" },
+    { name = "pytest-django", specifier = ">=0" },
+    { name = "tox", specifier = ">=0" },
+    { name = "tox-uv", specifier = ">=0" },
 ]
 django60 = [
-    { name = "code-annotations" },
+    { name = "code-annotations", specifier = ">=0" },
     { name = "django", specifier = ">=6.0,<7.0" },
-    { name = "django-extensions" },
-    { name = "edx-django-utils" },
-    { name = "pytest-cov" },
-    { name = "pytest-django" },
+    { name = "django-extensions", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "pytest-cov", specifier = ">=0" },
+    { name = "pytest-django", specifier = ">=0" },
 ]
 doc = [
-    { name = "build" },
-    { name = "code-annotations" },
+    { name = "build", specifier = ">=0" },
+    { name = "code-annotations", specifier = ">=0" },
     { name = "django", specifier = ">=5.0,<6.0" },
-    { name = "django-extensions" },
-    { name = "doc8" },
-    { name = "edx-django-utils" },
-    { name = "pytest-cov" },
-    { name = "pytest-django" },
-    { name = "sphinx" },
-    { name = "sphinx-book-theme" },
-    { name = "twine" },
+    { name = "django-extensions", specifier = ">=0" },
+    { name = "doc8", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "pytest-cov", specifier = ">=0" },
+    { name = "pytest-django", specifier = ">=0" },
+    { name = "sphinx", specifier = ">=0" },
+    { name = "sphinx-book-theme", specifier = ">=0" },
+    { name = "twine", specifier = ">=0" },
 ]
 quality = [
-    { name = "code-annotations" },
+    { name = "code-annotations", specifier = ">=0" },
     { name = "django", specifier = ">=5.0,<6.0" },
-    { name = "django-extensions" },
-    { name = "edx-django-utils" },
-    { name = "edx-lint" },
-    { name = "isort" },
-    { name = "pycodestyle" },
-    { name = "pydocstyle" },
-    { name = "pytest-cov" },
-    { name = "pytest-django" },
+    { name = "django-extensions", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "edx-lint", specifier = ">=6.2" },
+    { name = "isort", specifier = ">=0" },
+    { name = "pycodestyle", specifier = ">=0" },
+    { name = "pydocstyle", specifier = ">=0" },
+    { name = "pytest-cov", specifier = ">=0" },
+    { name = "pytest-django", specifier = ">=0" },
 ]
 test = [
-    { name = "code-annotations" },
+    { name = "code-annotations", specifier = ">=0" },
     { name = "django", specifier = ">=5.0,<6.0" },
-    { name = "django-extensions" },
-    { name = "edx-django-utils" },
-    { name = "pytest-cov" },
-    { name = "pytest-django" },
+    { name = "django-extensions", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "pytest-cov", specifier = ">=0" },
+    { name = "pytest-django", specifier = ">=0" },
 ]
 test-base = [
-    { name = "code-annotations" },
-    { name = "django-extensions" },
-    { name = "edx-django-utils" },
-    { name = "pytest-cov" },
-    { name = "pytest-django" },
+    { name = "code-annotations", specifier = ">=0" },
+    { name = "django-extensions", specifier = ">=0" },
+    { name = "edx-django-utils", specifier = ">=0" },
+    { name = "pytest-cov", specifier = ">=0" },
+    { name = "pytest-django", specifier = ">=0" },
 ]
 
 [[package]]
