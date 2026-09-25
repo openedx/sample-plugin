@@ -1,6 +1,6 @@
 # tutor-contrib-sample
 
-A Tutor plugin that installs and wires up the three other sub-packages in this repo ([`backend-plugin-sample`](../backend-plugin-sample/), [`frontend-plugin-sample`](../frontend-plugin-sample/), and [`brand-sample`](../brand-sample/)) into a Tutor-based Open edX deployment. Enabling this plugin is the simplest way to see all three working together.
+A Tutor plugin that installs and wires up the other sub-packages in this repo ([`backend-plugin-sample`](../backend-plugin-sample/), the two frontend siblings [`frontend-plugin-sample`](../frontend-plugin-sample/) and [`frontend-app-sample`](../frontend-app-sample/), and [`brand-sample`](../brand-sample/)) into a Tutor-based Open edX deployment. Enabling this plugin is the simplest way to see them working together.
 
 ## How to use it
 
@@ -22,7 +22,10 @@ The plugin is a single file: [`tutorsample/plugin.py`](./tutorsample/plugin.py).
 
 **Migrations.** Adds `manage.py lms migrate openedx_plugin_sample` (and the CMS equivalent) to the `tutor … do init` task list.
 
-**Frontend.** (Only when `tutor-mfe` is installed.) Installs the published `@openedx/plugin-sample` npm package into every MFE image, injects an `import { CourseList } from '@openedx/plugin-sample'` into the generated `env.config.jsx`, and wires `CourseList` into the `org.openedx.frontend.learner_dashboard.course_list.v1` slot (hiding the default contents).
+**Frontend.** (Only when `tutor-mfe` is installed.) The plugin registers both frontend siblings unconditionally; each is inert unless its target stack is the active one, so the operator picks the path by flipping `apps["learner-dashboard"]["enabled"]` in tutor-mfe's `FRONTEND_APPS` filter.
+
+- *frontend-plugin-framework* — installs the published `@openedx/plugin-sample` npm package into every MFE image, injects an `import { CourseList } from '@openedx/plugin-sample'` into the generated `env.config.jsx`, and wires `CourseList` into the `org.openedx.frontend.learner_dashboard.course_list.v1` slot (hiding the default contents). Renders into the legacy per-MFE learner-dashboard, which tutor-mfe skips when the frontend-base learner-dashboard App is enabled.
+- *frontend-base* — registers `@openedx/frontend-app-sample` via the `FRONTEND_APPS` filter and adds it to the bundled site with `addApp()` through the `mfe-site-config-imports` / `mfe-site-config` patches. The App's own slot operation targets a slot that only exists when the frontend-base learner-dashboard App is loaded.
 
 **Brand.** Sets `MFE_CONFIG["PARAGON_THEME_URLS"]` to load Paragon's default light theme overlaid with the compiled `brand-sample/dist/light.min.css` served from jsDelivr.
 

@@ -1,0 +1,6 @@
+{
+  "extends": "@openedx/frontend-base/tools/tsconfig.json",
+  "include": [
+    "src/**/*"
+  ]
+}
