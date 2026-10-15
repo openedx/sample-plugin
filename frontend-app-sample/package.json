@@ -1,0 +1,23 @@
+{
+  "name": "@openedx/frontend-app-sample",
+  "version": "0.0.0-dev",
+  "description": "Sample frontend-base App that customizes the learner-dashboard course list.",
+  "repository": "https://github.com/openedx/sample-plugin",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "prepack": "npm run clean && npm run build"
+  },
+  "peerDependencies": {
+    "@openedx/frontend-base": "^1.0.0-alpha || 0.0.0-dev",
+    "@openedx/paragon": "^23",
+    "react": "^18"
+  }
+}
