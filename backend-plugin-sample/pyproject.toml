@@ -126,6 +126,14 @@ where = ["src"]
 # code and files we need in this repo.
 build_command = "pip install build && SETUPTOOLS_SCM_PRETEND_VERSION=$NEW_VERSION python -m build"
 
+[tool.semantic_release.branches.main]
+match = "main"
+
+# Release branches (e.g. release/ulmo) can be released by running release.yml
+# manually to patch an older release line. The version comes from that branch's tags.
+[tool.semantic_release.branches.maintenance]
+match = "^release/[a-z]+$"
+
 [tool.semantic_release.commit_parser_options]
 # Because this repo is meant to be an example, docs changes are relevant
 # feature changes and so should produces new releases.
