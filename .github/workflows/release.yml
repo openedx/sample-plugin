@@ -66,14 +66,13 @@ jobs:
           force: ${{ inputs.force != 'auto' && inputs.force || '' }}
 
       # python-semantic-release exits successfully without releasing when the
-      # branch is not in a release group, there is nothing to release, or the
-      # next version is already tagged on another branch (e.g. main already
-      # released 3.8.5 and release/ulmo now computes 3.8.5 too). A manual run
-      # is always meant to release, so fail it rather than show it as green.
+      # branch is not in a release group or there is nothing to release. A
+      # manual run is always meant to release, so fail it rather than show it
+      # as green.
       - name: Check | Fail a manual run that released nothing
         if: github.event_name == 'workflow_dispatch' && steps.release.outputs.released != 'true'
         run: |
-          echo "::error::No release was made. Run this on main or release/<name>, with releasable commits, and make sure the next version is not already tagged on another branch."
+          echo "::error::No release was made. Run this on main or release/<name>, with releasable commits."
           exit 1
 
       # Built before the release is created so that its distributions can be
