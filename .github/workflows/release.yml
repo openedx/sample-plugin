@@ -75,6 +75,21 @@ jobs:
           echo "::error::No release was made. Run this on main or release/<name>, with releasable commits."
           exit 1
 
+      # python-semantic-release also skips the release, and exits successfully,
+      # when the next version is already tagged on another branch, eg. main's
+      # next minor taken by a release branch. Fail so the skip doesn't look green.
+      - name: Check | Fail when the next version is tagged on another branch
+        if: steps.release.outputs.released != 'true'
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          git fetch --tags --quiet
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null \
+              && ! git merge-base --is-ancestor "$TAG" HEAD; then
+            echo "::error::$TAG is already tagged on another branch, so this release was skipped."
+            exit 1
+          fi
+
       # Built before the release is created so that its distributions can be
       # attached as release assets too. See the release step for why that
       # ordering matters.
