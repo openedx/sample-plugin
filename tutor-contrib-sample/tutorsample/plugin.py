@@ -1,20 +1,34 @@
 """
 Tutor plugin for the Open edX Sample Plugin.
 
-Installs the backend Django app (openedx-plugin-sample from PyPI) into LMS/CMS
-and configures the frontend MFE slot (from @openedx/plugin-sample on npm) in the
-learner-dashboard.
+Backend
+-------
+Installs the openedx-plugin-sample Django app into LMS/CMS, runs its
+migrations, and (optionally) bind-mounts a local backend-plugin-sample
+checkout into image builds.
+
+Frontend
+--------
+Registers both frontend siblings:
+
+* @openedx/plugin-sample is npm-installed into the legacy MFE images and
+  contributes a PLUGIN_SLOTS entry that swaps in CourseList on the
+  learner-dashboard's course list slot.
+
+* @openedx/frontend-app-sample is registered as a frontend-base app and
+  wired into the bundled site via the mfe-site-config-imports /
+  mfe-site-config patches.
 
 Requirements:
-    tutor>=17.0.0
-    tutor-mfe (for frontend slot configuration)
+    tutor>=21.0.0
+    tutor-mfe (for both legacy MFE slots and frontend-base site config)
 """
 import json
 
 from tutor import hooks
 
 try:
-    from tutormfe.hooks import PLUGIN_SLOTS
+    from tutormfe.hooks import FRONTEND_APPS, PLUGIN_SLOTS
     _tutormfe_available = True
 except ImportError:
     _tutormfe_available = False
@@ -34,7 +48,7 @@ hooks.Filters.ENV_PATCHES.add_item((
 
 # Ensure that *if* backend-plugin-sample is bind-mounted, then it is mapped
 # to /mnt/backend-plugin-sample and pip-installed as part of the openedx
-# and openedx-dev image builds
+# and openedx-dev image builds.
 
 hooks.Filters.MOUNTED_DIRECTORIES.add_item(("openedx", "backend-plugin-sample"))
 
@@ -52,14 +66,15 @@ hooks.Filters.CLI_DO_INIT_TASKS.add_item((
 ))
 
 # ---------------------------------------------------------------------------
-# Frontend: Install npm package and configure the learner-dashboard slot
+# Frontend: Register the frontend-base app and configure the legacy MFE slot
 # ---------------------------------------------------------------------------
 # Only runs when tutor-mfe is installed, so the plugin degrades gracefully
 # if someone uses this plugin without the MFE plugin.
 # ---------------------------------------------------------------------------
 
 if _tutormfe_available:
-    # Step 1: Install the npm package into all MFE images.
+    # ---- legacy FPF -----------------------------------------------------
+    # Install the npm package into all MFE images.
     # Ideally this would use mfe-dockerfile-post-npm-install-learner-dashboard
     # to scope installation to only the MFE that needs it, but env.config.jsx
     # is a single shared file rendered for all MFEs. The buildtime import below
@@ -70,7 +85,7 @@ if _tutormfe_available:
         "RUN npm install @openedx/plugin-sample",
     ))
 
-    # Step 2: Import the CourseList component in the MFE env config so it is
+    # Import the CourseList component in the MFE env config so it is
     # in scope when the plugin slot configuration is evaluated at runtime.
     # The mfe-env-config-buildtime-imports patch injects import statements
     # into the generated env.config.jsx file.
@@ -79,7 +94,7 @@ if _tutormfe_available:
         "import { CourseList } from '@openedx/plugin-sample';",
     ))
 
-    # Step 3: Configure the course list plugin slot.
+    # Configure the course list plugin slot.
     # - Hide the default CourseList that ships with the learner-dashboard.
     # - Insert our custom CourseList that adds archive/unarchive functionality.
     #
@@ -103,6 +118,36 @@ if _tutormfe_available:
             RenderWidget: CourseList,
           },
         }""",
+    ))
+
+    # ---- frontend-base --------------------------------------------------
+    # Register @openedx/frontend-app-sample with tutor-mfe so the site's
+    # npm install picks it up. The FRONTEND_APPS filter is what tutor-mfe
+    # iterates over when generating the site's package.json and site config.
+    @FRONTEND_APPS.add()
+    def _add_frontend_app_sample(apps):
+        apps["sample"] = {
+            "npm_package": "@openedx/frontend-app-sample",
+            "npm_version": "*",
+            "enabled": True,
+        }
+        return apps
+
+    # Import the frontend-app-sample App in the generated site config so it
+    # is in scope when addApp() is called. The mfe-site-config-imports patch
+    # injects import statements into the generated site.config.*.tsx file.
+    hooks.Filters.ENV_PATCHES.add_item((
+        "mfe-site-config-imports",
+        "import sampleApp from '@openedx/frontend-app-sample';",
+    ))
+
+    # Register the App on the bundled site via addApp(). The App's own
+    # slot operations (defined in frontend-app-sample/src/app.tsx) target
+    # the frontend-base learner-dashboard's course list slot; they are
+    # inert if that App isn't enabled in the operator's FRONTEND_APPS.
+    hooks.Filters.ENV_PATCHES.add_item((
+        "mfe-site-config",
+        "addApp(siteConfig, sampleApp);",
     ))
 
 # ---------------------------------------------------------------------------
