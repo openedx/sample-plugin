@@ -3,6 +3,14 @@ name: Semantic Release
 on:
   push:
     branches: [main]
+  # Run manually on an older branch to cut a patch release for that line.
+  workflow_dispatch:
+    inputs:
+      force:
+        description: 'Force a version bump (auto = derive from commits)'
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
 
 jobs:
   # The same aggregate a pull request has to pass, so the release runs exactly
@@ -18,7 +26,6 @@ jobs:
     # release half-finished.
     needs: [run_ci]
     runs-on: ubuntu-latest
-    if: github.ref_name == 'main'
     concurrency:
       group: ${{ github.workflow }}-release-${{ github.ref_name }}
       cancel-in-progress: false
@@ -56,6 +63,32 @@ jobs:
           # We create it ourselves in the next step so that the distributions
           # are attached before the release is published. See that step for why.
           vcs_release: "false"
+          force: ${{ inputs.force != 'auto' && inputs.force || '' }}
+
+      # python-semantic-release exits successfully without releasing when the
+      # branch is not in a release group or there is nothing to release. A
+      # manual run is always meant to release, so fail it rather than show it
+      # as green.
+      - name: Check | Fail a manual run that released nothing
+        if: github.event_name == 'workflow_dispatch' && steps.release.outputs.released != 'true'
+        run: |
+          echo "::error::No release was made. Run this on main or release/<name>, with releasable commits."
+          exit 1
+
+      # python-semantic-release also skips the release, and exits successfully,
+      # when the next version is already tagged on another branch, eg. main's
+      # next minor taken by a release branch. Fail so the skip doesn't look green.
+      - name: Check | Fail when the next version is tagged on another branch
+        if: steps.release.outputs.released != 'true'
+        env:
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          git fetch --tags --quiet
+          if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null \
+              && ! git merge-base --is-ancestor "$TAG" HEAD; then
+            echo "::error::$TAG is already tagged on another branch, so this release was skipped."
+            exit 1
+          fi
 
       # Built before the release is created so that its distributions can be
       # attached as release assets too. See the release step for why that
@@ -89,6 +122,7 @@ jobs:
           # publishes it -- all within this one command.
           gh release create "$TAG" \
             --verify-tag \
+            --latest=${{ github.ref_name == 'main' }} \
             --title "$TAG" \
             --notes-file "$RUNNER_TEMP/release_notes.md" \
             backend-plugin-sample/dist/* \
@@ -121,7 +155,7 @@ jobs:
     #    and it won't require reversing the release.
     runs-on: ubuntu-latest
     needs: release
-    if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
+    if: needs.release.outputs.released == 'true'
 
     permissions:
       contents: read
@@ -143,7 +177,7 @@ jobs:
   publish_tutor_plugin_to_pypi:
     runs-on: ubuntu-latest
     needs: release
-    if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
+    if: needs.release.outputs.released == 'true'
 
     permissions:
       contents: read
@@ -164,7 +198,7 @@ jobs:
   publish_to_npm:
     runs-on: ubuntu-latest
     needs: release
-    if: github.ref_name == 'main' && needs.release.outputs.released == 'true'
+    if: needs.release.outputs.released == 'true'
     permissions:
       contents: read
       id-token: write
@@ -181,9 +215,13 @@ jobs:
           node-version-file: './frontend-plugin-sample/.nvmrc'
 
       - name: Update the package version and publish
+        # Only releases from main move the `latest` dist-tag; an older line
+        # (release/ulmo) is published under its own name (ulmo).
+        env:
+          DIST_TAG: ${{ github.ref_name == 'main' && 'latest' || github.ref_name }}
         run: |
           npm ci
           npm version --no-git-tag-version ${{ needs.release.outputs.version }}
           npm run build
-          npm publish
+          npm publish --tag "${DIST_TAG#release/}"
         working-directory: './frontend-plugin-sample'

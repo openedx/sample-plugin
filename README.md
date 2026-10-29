@@ -60,6 +60,21 @@ This path assumes you already have edx-platform running locally (bare-metal or d
 
   > TODO: a fully local brand-development flow without Tutor (recompile + serve from disk) is not yet documented.
 
+## Releasing from an older release branch
+
+1. Create a `release/<name>` branch from the release tag, e.g. `git switch -c release/ulmo v3.8.7`, and merge the fix into it as a `fix:` commit.
+   Only branches matching `release/<name>` can be released.
+2. Go to **Actions → Semantic Release → Run workflow** and select that branch.
+3. Optionally set `force` to `patch`, `minor` or `major`. The default `auto` derives the bump from the commits.
+
+The version comes from the tags on that branch only, so a `fix:` on `release/ulmo` releases `3.8.8` even if `main` is on `3.9.x`.
+Backports should land as `fix:` commits, so the line gets a patch and not the next minor that `main` will want. For the same reason, make `main`'s next release after cutting the branch at least a minor bump (a `feat:` commit, or `force: minor`).
+The GitHub Release is not marked as latest, and the npm package is published under the `<name>` dist-tag instead of `latest`.
+
+This works only for branches cut from a release that includes this workflow. Older release branches have to be released manually.
+
+See [Multibranch Releases](https://python-semantic-release.readthedocs.io/en/latest/concepts/multibranch_releases.html) for more details.
+
 ## Getting help
 
 - Open edX [community Slack](https://openedx.org/slack) and [discussion forums](https://discuss.openedx.org)
