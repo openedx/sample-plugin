@@ -2,6 +2,9 @@
 
 A React component that replaces the learner-dashboard's course list with one that supports archiving courses. Wired into the `org.openedx.frontend.learner_dashboard.course_list.v1` plugin slot. Reads each course's archive state from a filter-injected slot prop and writes back to the [`backend-plugin-sample`](../backend-plugin-sample/) REST API on toggle.
 
+> [!NOTE]
+> This is the legacy frontend-plugin-framework sibling of [`../frontend-app-sample/`](../frontend-app-sample/), which targets the newer [`frontend-base`](https://github.com/openedx/frontend-base) stack. The Tutor plugin in [`../tutor-contrib-sample/`](../tutor-contrib-sample/) registers both; this one is the active path when the frontend-base learner-dashboard App is *not* enabled in tutor-mfe, the frontend-base sibling otherwise. See the [porting guide](https://docs.openedx.org/en/latest/site_ops/how-tos/port-frontend-plugin-to-frontend-base.html) for the differences between the two.
+
 ## How to use it
 
 See the root [README](../README.md) for setup instructions. With Tutor, [`tutor-contrib-sample`](../tutor-contrib-sample/) installs the published npm package and wires it into the learner-dashboard slot. For local source development (with or without Tutor), the MFE-side files in [Local development setup](#local-development-setup) below are required.
